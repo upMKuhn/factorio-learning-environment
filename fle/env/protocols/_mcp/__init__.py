@@ -11,7 +11,6 @@ try:
     # Create the MCP server instance FIRST
     mcp = FastMCP(
         "Factorio Learning Environment",
-        dependencies=["dulwich", "numpy", "pillow"],
     )
     _FASTMCP_AVAILABLE = True
 except ImportError:
@@ -49,7 +48,8 @@ async def fle_lifespan(server) -> AsyncIterator[FactorioContext]:
 
 
 # Attach the lifespan to mcp
-mcp.lifespan = fle_lifespan
+if mcp is not None:
+    mcp.lifespan = fle_lifespan
 
 
 # Export mcp for other modules
