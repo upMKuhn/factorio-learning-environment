@@ -82,20 +82,30 @@ _ARROW_DELTAS = {0: (0, -1), 4: (1, 0), 8: (0, 1), 12: (-1, 0)}
 
 
 def _draw_direction_arrow(draw: ImageDraw.Draw, x0: int, y0: int, scale: int, direction: int,
-                          color: tuple[int, int, int] = (255, 255, 255)) -> None:
-    """Draw a small direction arrow inside a tile cell."""
+                          color: tuple[int, int, int, int] | tuple[int, int, int] = (255, 255, 255),
+                          filled: bool = True) -> None:
+    """Draw a triangular arrow inside a tile cell pointing in the given direction."""
     if direction == 0:
         return
     cx = x0 + scale // 2
     cy = y0 + scale // 2
     r = scale // 3
+
     nearest = min(_ARROW_DELTAS.keys(), key=lambda d: abs(d - direction))
     dx, dy = _ARROW_DELTAS[nearest]
-    draw.line(
-        [(cx - dx * r // 2, cy - dy * r // 2), (cx + dx * r, cy + dy * r)],
-        fill=color,
-        width=max(1, scale // 6),
-    )
+
+    # Triangle tip + two base corners perpendicular to direction
+    tip = (cx + dx * r, cy + dy * r)
+    # Perpendicular vector
+    px, py = -dy, dx
+    base_half = r * 0.6
+    base1 = (cx - dx * r // 3 + px * base_half, cy - dy * r // 3 + py * base_half)
+    base2 = (cx - dx * r // 3 - px * base_half, cy - dy * r // 3 - py * base_half)
+
+    if filled:
+        draw.polygon([tip, base1, base2], fill=color)
+    else:
+        draw.polygon([tip, base1, base2], outline=color, width=max(1, scale // 12))
 
 
 # ── Machine mode ──────────────────────────────────────────────────────────────
@@ -212,9 +222,16 @@ def grid_to_human(
                 label = info.name.split("-")[-1][:8]
                 draw.text((x0 + 4, y0 + 4), label, fill=(255, 255, 255, 220))
 
-            # Direction arrow overlay for single-tile entities
-            if info.width == 1 and info.height == 1 and direction > 0:
-                _draw_direction_arrow(draw, x0, y0, scale, direction, color=(255, 255, 0))
+            # Direction arrow overlay
+            if direction > 0:
+                if info.width == 1 and info.height == 1:
+                    _draw_direction_arrow(draw, x0, y0, scale, direction, color=(255, 220, 0, 200))
+                else:
+                    arrow_size = min(icon_w, icon_h) // 2
+                    arrow_x = x0 + (icon_w - arrow_size) // 2
+                    arrow_y = y0 + (icon_h - arrow_size) // 2
+                    _draw_direction_arrow(draw, arrow_x, arrow_y, arrow_size, direction,
+                                          color=(255, 220, 0, 180))
 
     return img.convert("RGB")
 

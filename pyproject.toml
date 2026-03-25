@@ -60,6 +60,7 @@ dependencies = [
     "jinja2>=3.1.6",
     "hf>=0.0.14",
     "psycopg2-binary>=2.9.10",
+    "fastmcp>=3.1.1",
 ]
 
 [project.optional-dependencies]
@@ -133,6 +134,7 @@ packages = ["fle"]
 [tool.pytest.ini_options]
 pythonpath = "fle/env"
 testpaths = "tests"
+
 python_files = "test_*.py"
 
 [project.urls]
