@@ -128,8 +128,10 @@ def fetch_and_decode(key: str, summary: dict) -> list[dict] | None:
             "tags": bp.tags,
             "favorites": bp.favorites,
             "entity_count": bp.entity_count,
+            "blueprint_string": cdn_data.get("blueprintString", ""),
             "entities": [
-                {"name": e.name, "x": e.x, "y": e.y, "direction": e.direction}
+                {"name": e.name, "x": e.x, "y": e.y, "direction": e.direction,
+                 **({"recipe": e.recipe} if e.recipe else {})}
                 for e in bp.entities
             ],
         })

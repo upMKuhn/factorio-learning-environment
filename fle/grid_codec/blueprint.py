@@ -96,7 +96,8 @@ def raw_entities_to_specs(raw_entities: list[dict]) -> list[EntitySpec]:
         raw_dir = ent.get("direction", 0)
         direction = raw_dir * 2 if raw_dir <= 7 else raw_dir
 
-        specs.append(EntitySpec(name=name, x=x, y=y, direction=direction))
+        recipe = ent.get("recipe")
+        specs.append(EntitySpec(name=name, x=x, y=y, direction=direction, recipe=recipe))
 
     return specs
 
