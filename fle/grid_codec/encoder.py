@@ -92,8 +92,7 @@ def encode(
         info: EntityInfo = ENTITY_REGISTRY.from_name(entity.name)
         meta = entity.meta_override if entity.meta_override is not None else int(info.meta)
 
-        # Clamp instance_id to uint8
-        inst = min(instance_id, 255)
+        inst = instance_id  # uint16 grid supports up to 65535 instances
 
         # Recipe ID: looked up from recipe_index mapping if provided
         recipe_id = 0
