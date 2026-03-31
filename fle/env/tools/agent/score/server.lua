@@ -399,7 +399,7 @@ local price_list = production_score.generate_price_list()
 storage.initial_harvested_value = get_harvested_value(price_list)
 storage.initial_crafted_net_value = get_crafted_net_value(price_list)
 
-storage.actions.score = function()
+fle_actions.score = function()
     local price_list = production_score.generate_price_list()
     local prod_score = production_score.get_production_scores()
     local total_score = prod_score["player"] - storage.initial_score["player"]

@@ -1,6 +1,6 @@
-storage.actions.craft_item = function(player_index, entity, count)
+fle_actions.craft_item = function(player_index, entity, count)
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
 
     local function calculate_crafting_ticks(recipe, crafts_count)
         -- energy_required is in seconds, multiply by 60 to get standard ticks

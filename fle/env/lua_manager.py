@@ -1,5 +1,6 @@
 import hashlib
 import json
+import time
 
 import importlib
 import os
@@ -89,6 +90,10 @@ class LuaScriptManager:
             print(f"{self.rcon_client.port}: Loading action {script_name} into game")
 
             response = self.rcon_client.send_command("/sc " + script)
+            # Yield so the server can process network heartbeats between
+            # script loads (prevents multiplayer client timeout/desync).
+            # Scale with script size since larger scripts block longer.
+            time.sleep(0.1 + len(script) / 50000)
 
             if response and "error" in response.lower():
                 raise Exception(response)
@@ -107,11 +112,10 @@ class LuaScriptManager:
             self.update_game_checksum(self.rcon_client, name, checksum)
 
         response = self.rcon_client.send_command("/c " + script)
+        time.sleep(0.1 + len(script) / 50000)
 
         if response and "error" in response.lower():
             raise Exception(response)
-
-        pass
 
     def calculate_checksum(self, content: str) -> str:
         return hashlib.md5(content.encode()).hexdigest()
@@ -165,15 +169,15 @@ class LuaScriptManager:
 
     def update_game_checksum(self, rcon_client, script_name: str, checksum: str):
         rcon_client.send_command(
-            f"/sc storage.set_lua_script_checksum('{script_name}', '{checksum}')"
+            f"/sc fle_set_lua_script_checksum('{script_name}', '{checksum}')"
         )
 
     def _clear_game_checksums(self, rcon_client):
-        rcon_client.send_command("/sc storage.clear_lua_script_checksums()")
+        rcon_client.send_command("/sc fle_clear_lua_script_checksums()")
 
     def _get_game_checksums(self, rcon_client):
         response = rcon_client.send_command(
-            "/sc rcon.print(storage.get_lua_script_checksums())"
+            "/sc rcon.print(fle_get_lua_script_checksums())"
         )
         return json.loads(response)
 

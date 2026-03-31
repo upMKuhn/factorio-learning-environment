@@ -148,8 +148,8 @@ function analyze_cliff_orientation(entity, surface)
     return orientation
 end
 
--- Modify the entity processing section in storage.actions.render
-storage.actions.render = function(player_index, include_status, radius, compression_level)
+-- Modify the entity processing section in fle_actions.render
+fle_actions.render = function(player_index, include_status, radius, compression_level)
     local player = storage.agent_characters[player_index]
     if not player then
         return nil, "Player not found"

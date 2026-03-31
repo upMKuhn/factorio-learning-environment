@@ -174,7 +174,7 @@ class Controller:
         """Execute a single command attempt, returns (result, elapsed, lua_response)"""
         start = time.time()
         parameters = [lua.encode(arg) for arg in args]
-        invocation = f"pcall(storage.actions.{self.name}{(', ' if parameters else '') + ','.join(parameters)})"
+        invocation = f"pcall(fle_actions.{self.name}{(', ' if parameters else '') + ','.join(parameters)})"
         wrapped = f"{COMMAND} a, b = {invocation}; rcon.print(dump({{a=a, b=b}}))"
         lua_response = self.connection.rcon_client.send_command(wrapped)
 
@@ -261,7 +261,7 @@ class Controller:
         try:
             start = time.time()
             parameters = [lua.encode(arg) for arg in args]
-            invocation = f"pcall(storage.actions.{self.name}{(', ' if parameters else '') + ','.join(parameters)})"
+            invocation = f"pcall(fle_actions.{self.name}{(', ' if parameters else '') + ','.join(parameters)})"
             wrapped = f"{COMMAND} a, b = {invocation}; rcon.print(dump({{a=a, b=b}}))"
             lua_response = self.connection.rcon_client.send_command(wrapped)
             parsed, elapsed = _lua2python(invocation, lua_response, start=start)

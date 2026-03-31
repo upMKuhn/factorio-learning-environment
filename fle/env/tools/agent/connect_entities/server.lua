@@ -271,7 +271,7 @@ local function serialize_belt_group(entity)
         visited[belt_id] = true
         
         -- Serialize this belt
-        table.insert(serialized, storage.utils.serialize_entity(current_belt))
+        table.insert(serialized, fle_utils.serialize_entity(current_belt))
         
         -- Add all neighboring belts to queue (both inputs and outputs)
         if current_belt.belt_neighbours then
@@ -493,11 +493,11 @@ local function place_at_position(player, connection_type, current_position, dir,
         -- Update or add to serialized list
         for i, serialized in ipairs(serialized_entities) do
             if serialized.position.x == current_position.x and serialized.position.y == current_position.y then
-                serialized_entities[i] = storage.utils.serialize_entity(existing_entity)
+                serialized_entities[i] = fle_utils.serialize_entity(existing_entity)
                 return existing_entity
             end
         end
-        table.insert(serialized_entities, storage.utils.serialize_entity(existing_entity))
+        table.insert(serialized_entities, fle_utils.serialize_entity(existing_entity))
         return existing_entity
 
     else
@@ -522,19 +522,19 @@ local function place_at_position(player, connection_type, current_position, dir,
                 force = player.force
             })
         else
-            can_place = storage.utils.can_place_entity(player, connection_type, placement_position, dir)
+            can_place = fle_utils.can_place_entity(player, connection_type, placement_position, dir)
         end
 
-        --local can_place = storage.utils.avoid_entity(1, connection_type, placement_position, dir)
+        --local can_place = fle_utils.avoid_entity(1, connection_type, placement_position, dir)
         --if not can_build then
         --    error("Cannot place the entity at the specified position: x="..position.x..", y="..position.y)
         --end
         --local player_position = player.position
        -- player.teleport({placement_position.x, placement_position.y})
-        --local can_place = storage.actions.can_place_entity(1, connection_type, dir, placement_position.x, placement_position.y)--game.surfaces[1].can_place_entity(entity_variant)
+        --local can_place = fle_actions.can_place_entity(1, connection_type, dir, placement_position.x, placement_position.y)--game.surfaces[1].can_place_entity(entity_variant)
         --player.teleport(player_position)
 
-        --local can_place = storage.utils.avoid_entity(1, connection_type, placement_position, dir)
+        --local can_place = fle_utils.avoid_entity(1, connection_type, placement_position, dir)
         rendering.draw_circle{only_in_alt_mode=true, width = 0.25, color = {r = 0, g = 1, b = 0}, surface = player.surface, radius = 0.5, filled = false, target = placement_position, time_to_live = 12000}
 
         if dry_run and can_place == false then
@@ -556,13 +556,13 @@ local function place_at_position(player, connection_type, current_position, dir,
 
         -- Place entity
         if can_place and not dry_run then
-            --storage.utils.avoid_entity(player.index, connection_type, placement_position, dir)
+            --fle_utils.avoid_entity(player.index, connection_type, placement_position, dir)
 
             local placed_entity = game.surfaces[1].create_entity(entity_variant)
             if placed_entity then
                 player.remove_item({name = connection_type, count = 1})
                 counter_state.place_counter = counter_state.place_counter + 1
-                table.insert(serialized_entities, storage.utils.serialize_entity(placed_entity))
+                table.insert(serialized_entities, fle_utils.serialize_entity(placed_entity))
                 return placed_entity
             end
         
@@ -572,7 +572,7 @@ local function place_at_position(player, connection_type, current_position, dir,
 
         else
             -- game.print("Avoiding entity at " .. placement_position.x.. ", " .. placement_position.y)
-            -- storage.utils.avoid_entity(player.index, connection_type, placement_position, dir)
+            -- fle_utils.avoid_entity(player.index, connection_type, placement_position, dir)
 
             -- error("Cannot place entity")
             --local entities = player.surface.find_entities_filtered{position=placement_position, radius=0.5, type = {"beam", "resource", "player"}, invert=true}
@@ -595,7 +595,7 @@ local function place_at_position(player, connection_type, current_position, dir,
             --    if placed_entity then
             --        player.remove_item({name = connection_type, count = 1})
             --        counter_state.place_counter = counter_state.place_counter + 1
-            --        table.insert(serialized_entities, storage.utils.serialize_entity(placed_entity))
+            --        table.insert(serialized_entities, fle_utils.serialize_entity(placed_entity))
             --        return placed_entity
             --    end
             --
@@ -630,14 +630,14 @@ local function place_at_position(player, connection_type, current_position, dir,
             force = player.force
         })
     else
-        can_place = storage.utils.can_place_entity(player, connection_type, placement_position, dir)
+        can_place = fle_utils.can_place_entity(player, connection_type, placement_position, dir)
     end
     --local player_position = player.position
     --player.teleport({placement_position.x, placement_position.y})
-    --local can_place = storage.actions.can_place_entity(1, connection_type, dir, placement_position.x, placement_position.y)--game.surfaces[1].can_place_entity(entity_variant)
+    --local can_place = fle_actions.can_place_entity(1, connection_type, dir, placement_position.x, placement_position.y)--game.surfaces[1].can_place_entity(entity_variant)
     --player.teleport(player_position)
 
-    --local can_place = storage.utils.avoid_entity(1, connection_type, placement_position, dir)
+    --local can_place = fle_utils.avoid_entity(1, connection_type, placement_position, dir)
     rendering.draw_circle{only_in_alt_mode=true, width = 0.25, color = {r = 0, g = 1, b = 0}, surface = player.surface, radius = 0.5, filled = false, target = placement_position, time_to_live = 12000}
 
     if dry_run and can_place == false then
@@ -658,7 +658,7 @@ local function place_at_position(player, connection_type, current_position, dir,
 
     -- Place entity
     if can_place and not dry_run then
-        --storage.utils.avoid_entity(player.index, connection_type, placement_position, dir)
+        --fle_utils.avoid_entity(player.index, connection_type, placement_position, dir)
 
         local placed_entity = game.surfaces[1].create_entity({
             name = connection_type,
@@ -671,7 +671,7 @@ local function place_at_position(player, connection_type, current_position, dir,
         if placed_entity then
             player.remove_item({name = connection_type, count = 1})
             counter_state.place_counter = counter_state.place_counter + 1
-            table.insert(serialized_entities, storage.utils.serialize_entity(placed_entity))
+            table.insert(serialized_entities, fle_utils.serialize_entity(placed_entity))
             return placed_entity
         end
     
@@ -681,7 +681,7 @@ local function place_at_position(player, connection_type, current_position, dir,
 
     else
         -- game.print("Avoiding entity at " .. placement_position.x.. ", " .. placement_position.y)
-        -- storage.utils.avoid_entity(player.index, connection_type, placement_position, dir)
+        -- fle_utils.avoid_entity(player.index, connection_type, placement_position, dir)
 
         -- error("Cannot place entity")
         --local entities = player.surface.find_entities_filtered{position=placement_position, radius=0.5, type = {"beam", "resource", "player"}, invert=true}
@@ -704,7 +704,7 @@ local function place_at_position(player, connection_type, current_position, dir,
         --    if placed_entity then
         --        player.remove_item({name = connection_type, count = 1})
         --        counter_state.place_counter = counter_state.place_counter + 1
-        --        table.insert(serialized_entities, storage.utils.serialize_entity(placed_entity))
+        --        table.insert(serialized_entities, fle_utils.serialize_entity(placed_entity))
         --        return placed_entity
         --    end
         --
@@ -736,7 +736,7 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
         error("Invalid path: " .. serpent.line(path))
     end
 
-    local path = storage.utils.normalise_path(raw_path, start_position, end_position)
+    local path = fle_utils.normalise_path(raw_path, start_position, end_position)
 
     -- Get default and underground connection types
     local default_connection_type = default_connect_types[connection_types[1]] or connection_types[1]
@@ -767,23 +767,23 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
 
 
     for i = 1, #path-1, step_size do
-        storage.elapsed_ticks = storage.elapsed_ticks + storage.utils.calculate_movement_ticks(player, last_position, path[i].position)
+        storage.elapsed_ticks = storage.elapsed_ticks + fle_utils.calculate_movement_ticks(player, last_position, path[i].position)
         last_position = path[i].position
     end
 
     local serialized_entities = {}
 
     -- Get source and target entities
-    local source_entity = storage.utils.get_closest_entity(player, {x = source_x, y = source_y})
-    local target_entity = storage.utils.get_closest_entity(player, {x = target_x, y = target_y})
+    local source_entity = fle_utils.get_closest_entity(player, {x = source_x, y = source_y})
+    local target_entity = fle_utils.get_closest_entity(player, {x = target_x, y = target_y})
 
 
     if #connection_types == 1 and connection_types[1] == 'pipe-to-ground' then
         
         -- Calculate the direction from start to end.
         -- Factorio 2.0: get_direction returns 0, 4, 8, 12 - pass directly to get_entity_direction
-        local dir = storage.utils.get_direction(start_position, end_position)
-        local entrance_dir = storage.utils.get_entity_direction(underground_type, dir)
+        local dir = fle_utils.get_direction(start_position, end_position)
+        local entrance_dir = fle_utils.get_entity_direction(underground_type, dir)
 
         -- Place the underground entrance at the start position.
         place_at_position(player, underground_type, start_position, entrance_dir,
@@ -793,9 +793,9 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
         if underground_type == "pipe-to-ground" then
           -- For pipe-to-ground, rotate the direction 180° for the exit.
           -- Factorio 2.0: rotate 180° by adding 8 and mod 16
-          exit_dir = storage.utils.get_entity_direction(underground_type, (dir + 8) % 16)
+          exit_dir = fle_utils.get_entity_direction(underground_type, (dir + 8) % 16)
         else
-          exit_dir = storage.utils.get_entity_direction(underground_type, dir)
+          exit_dir = fle_utils.get_entity_direction(underground_type, dir)
         end
         
         -- Place the underground exit at the end position.
@@ -837,9 +837,9 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
                 local current_pos = path[current_index].position
                 local next_pos = path[current_index + 1].position
                 -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
-                local dir = storage.utils.get_direction(current_pos, next_pos)
+                local dir = fle_utils.get_direction(current_pos, next_pos)
                 place_at_position(player, default_connection_type, current_pos,
-                        storage.utils.get_entity_direction(default_connection_type, dir),
+                        fle_utils.get_entity_direction(default_connection_type, dir),
                         serialized_entities, dry_run, counter_state, false)
                 current_index = current_index + 1
                 if current_index > MAX_INDEX_PLACEMENT then
@@ -850,10 +850,10 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
             -- Place initial surface entity for direction change
             local margin_pos = path[section.start_index].position
             local margin_next_pos = path[section.start_index + 1].position
-            local margin_dir = storage.utils.get_direction(margin_pos, margin_next_pos)
+            local margin_dir = fle_utils.get_direction(margin_pos, margin_next_pos)
             -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
             place_at_position(player, default_connection_type, margin_pos,
-                    storage.utils.get_entity_direction(default_connection_type, margin_dir),
+                    fle_utils.get_entity_direction(default_connection_type, margin_dir),
                     serialized_entities, dry_run, counter_state, false)
 
             -- Split the section into multiple underground segments, limited by remaining_sections
@@ -866,10 +866,10 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
                 -- Place underground entrance
                 local entrance_pos = path[segment.entrance_index].position
                 local exit_pos = path[segment.exit_index].position
-                local dir = storage.utils.get_direction(entrance_pos, exit_pos)
+                local dir = fle_utils.get_direction(entrance_pos, exit_pos)
 
                 -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
-                local entity_dir = storage.utils.get_entity_direction(underground_type, dir)
+                local entity_dir = fle_utils.get_entity_direction(underground_type, dir)
 
                 place_at_position(player, underground_type, entrance_pos,
                         entity_dir,
@@ -877,7 +877,7 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
 
                 -- Adjust direction for pipe-to-ground exit (rotate 180°)
                 if underground_type == 'pipe-to-ground' then
-                    entity_dir = storage.utils.get_entity_direction(underground_type, (dir + 8) % 16)
+                    entity_dir = fle_utils.get_entity_direction(underground_type, (dir + 8) % 16)
                 end
 
                 place_at_position(player, underground_type, exit_pos,
@@ -891,10 +891,10 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
             if #segments > 0 then
                 local final_margin_pos = path[section.end_index].position
                 local final_prev_pos = path[section.end_index - 1].position
-                local final_dir = storage.utils.get_direction(final_prev_pos, final_margin_pos)
+                local final_dir = fle_utils.get_direction(final_prev_pos, final_margin_pos)
                 -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
                 place_at_position(player, default_connection_type, final_margin_pos,
-                        storage.utils.get_entity_direction(default_connection_type, final_dir),
+                        fle_utils.get_entity_direction(default_connection_type, final_dir),
                         serialized_entities, dry_run, counter_state, false)
             end
 
@@ -910,9 +910,9 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
             local current_pos = path[current_index].position
             local next_pos = path[current_index + 1].position
             -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
-            local dir = storage.utils.get_direction(current_pos, next_pos)
+            local dir = fle_utils.get_direction(current_pos, next_pos)
             place_at_position(player, default_connection_type, current_pos,
-                    storage.utils.get_entity_direction(default_connection_type, dir),
+                    fle_utils.get_entity_direction(default_connection_type, dir),
                     serialized_entities, dry_run, counter_state, false)
             current_index = current_index + 1
         end
@@ -922,9 +922,9 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
             local final_pos = path[#path].position
             local prev_pos = path[#path-1].position
             -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
-            local dir = storage.utils.get_direction(prev_pos, final_pos)
+            local dir = fle_utils.get_direction(prev_pos, final_pos)
             place_at_position(player, default_connection_type, final_pos,
-                    storage.utils.get_entity_direction(default_connection_type, dir),
+                    fle_utils.get_entity_direction(default_connection_type, dir),
                     serialized_entities, dry_run, counter_state, false)
         end
     else
@@ -939,14 +939,14 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
 
             if #entities > 0 and #path > 1 then
                 -- Calculate initial direction based on first two points in path
-                local initial_dir = storage.utils.get_direction(path[1].position, path[2].position)
-                --local entity_dir = storage.utils.get_entity_direction('pipe', initial_dir/2)
+                local initial_dir = fle_utils.get_direction(path[1].position, path[2].position)
+                --local entity_dir = fle_utils.get_entity_direction('pipe', initial_dir/2)
 
                 -- Update source belt direction if needed
                 local source_belt = entities[1]
                 if source_belt and source_belt.valid and source_belt.direction ~= initial_dir then
                     source_belt.direction = initial_dir
-                    table.insert(serialized_entities, storage.utils.serialize_entity(source_belt))
+                    table.insert(serialized_entities, fle_utils.serialize_entity(source_belt))
                 end
             end
         end
@@ -957,16 +957,16 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
 
             for i = 1, #path, step_size do
                 local current_pos = path[i].position
-                local dir = storage.utils.get_direction(current_pos, path[math.min(i + step_size, #path)].position)
+                local dir = fle_utils.get_direction(current_pos, path[math.min(i + step_size, #path)].position)
                 -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
-                local entity_dir = storage.utils.get_entity_direction(default_connection_type, dir)
+                local entity_dir = fle_utils.get_entity_direction(default_connection_type, dir)
 
                 -- Place the pole
                 local placed_entity = place_at_position(player, default_connection_type, current_pos, entity_dir, serialized_entities, dry_run, counter_state)
 
                 if not dry_run then
                     -- Get the newly placed pole
-                    local current_pole = placed_entity or storage.utils.get_closest_entity(player, current_pos)
+                    local current_pole = placed_entity or fle_utils.get_closest_entity(player, current_pos)
 
                     -- Check if we've achieved connectivity to the target
                     if are_poles_connected(current_pole, target_entity) then
@@ -979,11 +979,11 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
 
             -- If we haven't achieved connectivity yet, place one final pole at the target
             if not dry_run and last_pole and target_entity and not are_poles_connected(last_pole, target_entity) then
-                local final_dir = storage.utils.get_direction(path[#path].position, end_position)
+                local final_dir = fle_utils.get_direction(path[#path].position, end_position)
                 -- game.print("Placing final pole at "..serpent.line(end_position))
                 -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
                 place_at_position(player, default_connection_type, end_position,
-                        storage.utils.get_entity_direction(default_connection_type, final_dir),
+                        fle_utils.get_entity_direction(default_connection_type, final_dir),
                         serialized_entities, dry_run, counter_state)
             end
         else
@@ -992,10 +992,10 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
             end
 
             for i = 1, #path-1, step_size do
-                local dir = storage.utils.get_direction(path[i].position, path[math.min(i + step_size, #path)].position)
+                local dir = fle_utils.get_direction(path[i].position, path[math.min(i + step_size, #path)].position)
                 -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
                 local placed = place_at_position(player, default_connection_type, path[i].position,
-                        storage.utils.get_entity_direction(default_connection_type, dir),
+                        fle_utils.get_entity_direction(default_connection_type, dir),
                         serialized_entities, dry_run, counter_state)
                 if placed then
                     last_placed_entity = placed
@@ -1011,27 +1011,27 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
 
                 -- Place intermediate and final pipes
                 place_at_position(player, 'pipe', path[#path].position,
-                        storage.utils.get_direction(path[#path].position, preemptive_target),
+                        fle_utils.get_direction(path[#path].position, preemptive_target),
                         serialized_entities, dry_run, counter_state)
 
                 place_at_position(player, 'pipe', preemptive_target,
-                        storage.utils.get_direction(path[#path].position, preemptive_target),
+                        fle_utils.get_direction(path[#path].position, preemptive_target),
                         serialized_entities, dry_run, counter_state)
 
                 place_at_position(player, 'pipe', end_position,
-                        storage.utils.get_direction(preemptive_target, end_position),
+                        fle_utils.get_direction(preemptive_target, end_position),
                         serialized_entities, dry_run, counter_state)
             else
                 local last_path_index = #path
                 local second_to_last_index = math.max(1, last_path_index - 1)
-                local final_dir = storage.utils.get_direction(
+                local final_dir = fle_utils.get_direction(
                         path[second_to_last_index].position,
                         path[last_path_index].position
                 )
 
                 -- Factorio 2.0: get_direction returns 0/4/8/12 - pass directly
                 local final_entity = place_at_position(player, default_connection_type, end_position,
-                        storage.utils.get_entity_direction(default_connection_type, final_dir),
+                        fle_utils.get_entity_direction(default_connection_type, final_dir),
                         serialized_entities, dry_run, counter_state)
                         
 
@@ -1090,7 +1090,7 @@ local function connect_entities(player_index, source_x, source_y, target_x, targ
     }
 end
 
-storage.utils.normalise_path = function(original_path, start_position, end_position)
+fle_utils.normalise_path = function(original_path, start_position, end_position)
     local path = {}
     local seen = {}  -- To track seen positions
     if original_path == nil or #original_path < 1 or original_path == "not_found" then
@@ -1198,7 +1198,7 @@ local function are_belt_directions_compatible(dir1, dir2, pos1, pos2)
     -- This is a simplified check - you may need to adjust based on your specific needs
     if dir1 == dir2 then
         -- Same direction - check if it matches position delta
-        local expected_dir = storage.utils.get_direction(pos1, pos2)
+        local expected_dir = fle_utils.get_direction(pos1, pos2)
         return dir1 == expected_dir
     else
         -- Different directions - check if they form a valid turn
@@ -1391,7 +1391,7 @@ local function serialize_pipe_group(entity)
         visited[pipe_id] = true
 
         -- Serialize current pipe
-        table.insert(serialized, storage.utils.serialize_entity(current_pipe))
+        table.insert(serialized, fle_utils.serialize_entity(current_pipe))
 
         -- Find all connected pipes in the same fluid system
         local all_pipes = game.surfaces[1].find_entities_filtered{
@@ -1446,7 +1446,7 @@ local function serialize_pole_group(entity)
                     local pole_id = pole.unit_number
                     if not visited[pole_id] then
                         visited[pole_id] = true
-                        table.insert(serialized, storage.utils.serialize_entity(pole))
+                        table.insert(serialized, fle_utils.serialize_entity(pole))
                     end
                 end
             end
@@ -1479,9 +1479,9 @@ local function validate_belt_connectivity(path)
         end
 
         -- Calculate directions for current and next position
-        local current_dir = storage.utils.get_direction(current_pos, next_pos)
+        local current_dir = fle_utils.get_direction(current_pos, next_pos)
         local next_dir = i < #path - 1 and
-                        storage.utils.get_direction(next_pos, path[i + 2].position) or
+                        fle_utils.get_direction(next_pos, path[i + 2].position) or
                         current_dir
 
         -- Check direction compatibility
@@ -1639,7 +1639,7 @@ local function connect_entities_with_validation(player_index, source_x, source_y
             end
             
             -- Normalize path first
-            local normalized_path = storage.utils.normalise_path(path,
+            local normalized_path = fle_utils.normalise_path(path,
                     {x = source_x, y = source_y},
                     {x = target_x, y = target_y})
 
@@ -1659,7 +1659,7 @@ end
 
 
 -- Using the new shortest_path function.
-storage.actions.connect_entities = function(player_index, source_x, source_y, target_x, target_y, path_handle, connection_type_string, dry_run, number_of_connection_entities)
+fle_actions.connect_entities = function(player_index, source_x, source_y, target_x, target_y, path_handle, connection_type_string, dry_run, number_of_connection_entities)
 
     local connection_types = {}
     for item in string.gmatch(connection_type_string, "([^,]+)") do

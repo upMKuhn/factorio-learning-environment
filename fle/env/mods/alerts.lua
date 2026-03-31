@@ -30,8 +30,8 @@ local function is_transport_belt_blocked(entity)
 
         if not has_sink then
             -- Factorio 2.0: Use compat wrapper and check for non-empty contents
-            local contents_1 = line_1 and storage.utils.get_contents_compat(line_1) or {}
-            local contents_2 = line_2 and storage.utils.get_contents_compat(line_2) or {}
+            local contents_1 = line_1 and fle_utils.get_contents_compat(line_1) or {}
+            local contents_2 = line_2 and fle_utils.get_contents_compat(line_2) or {}
             local line_1_moving = next(contents_1) ~= nil and not line_1.can_insert_at_back()
             local line_2_moving = next(contents_2) ~= nil and not line_2.can_insert_at_back()
 
@@ -133,7 +133,7 @@ local function has_fuel(entity)
     if entity.burner then
         if not entity.burner.currently_burning then
             local fuel_inventory = entity.get_inventory(defines.inventory.fuel)
-            local contents = storage.utils.get_contents_compat(fuel_inventory)
+            local contents = fle_utils.get_contents_compat(fuel_inventory)
             for item_name, item_count in pairs(contents) do
                 local fuel_value = prototypes.item[item_name].fuel_value
                 if fuel_value and fuel_value > 0 then
@@ -245,7 +245,7 @@ local function is_inserter_waiting_for_source(entity)
 end
 
 
-function storage.utils.get_issues(entity)
+function fle_utils.get_issues(entity)
     local issues = {}
 
     if not can_mine(entity) then
@@ -377,7 +377,7 @@ local function on_tick(event)
         for _, surface in pairs(game.surfaces) do
             local entities = surface.find_entities_filtered({force = "player"})
             for _, entity in pairs(entities) do
-                local issues = storage.utils.get_issues(entity)
+                local issues = fle_utils.get_issues(entity)
 
                 if #issues > 0 then
                     local position = entity.position
@@ -398,7 +398,7 @@ local function on_tick(event)
 end
 
 -- Define a function to get alerts older than the number of seconds
-storage.get_alerts = function(seconds)
+fle_get_alerts = function(seconds)
     local current_tick = game.tick
     local old_alerts = {}
 
@@ -412,5 +412,6 @@ storage.get_alerts = function(seconds)
     return old_alerts
 end
 
--- Register the on_tick function to the on_tick event
-script.on_event(defines.events.on_tick, on_tick)
+-- NOTE: on_tick handler for alerts is registered in control.lua
+-- Do NOT register script.on_event here - it would overwrite control.lua's handler
+-- and cause multiplayer script mismatch errors on peer join.

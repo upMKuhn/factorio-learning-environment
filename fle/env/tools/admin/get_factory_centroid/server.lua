@@ -73,7 +73,7 @@ function calculate_factory_bounds(force)
 end
 
 -- Updated function to get factory centroid and update camera smoothly
-storage.actions.get_factory_centroid = function(player)
+fle_actions.get_factory_centroid = function(player)
     -- Default to player force if none specified
     local force = "player"
 

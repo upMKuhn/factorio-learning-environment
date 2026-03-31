@@ -3,9 +3,9 @@ if not storage.clearance_entities then
     storage.clearance_entities = {}
 end
 
-storage.actions.request_path = function(player_index, start_x, start_y, goal_x, goal_y, radius, allow_paths_through_own_entities, entity_size)
+fle_actions.request_path = function(player_index, start_x, start_y, goal_x, goal_y, radius, allow_paths_through_own_entities, entity_size)
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
     if not player then return nil end
     local size = entity_size/2 - 0.01
 
@@ -49,7 +49,7 @@ storage.actions.request_path = function(player_index, start_x, start_y, goal_x, 
 
     -- Add temporary collision entities
     local clearance_entities = {}
-    storage.utils.avoid_entity(player_index, "iron-chest", {y = goal_y, x = goal_x})
+    fle_utils.avoid_entity(player_index, "iron-chest", {y = goal_y, x = goal_x})
     
     local goal_position = player.surface.find_non_colliding_position(
         "iron-chest",
@@ -124,26 +124,6 @@ end
 --    end
 --end)
 
-script.on_event(defines.events.on_script_path_request_finished, function(event)
-    local request_data = storage.path_requests[event.id]
-    if not request_data then
-        game.print("No request data found for ID: " .. event.id)
-        return
-    end
-
-    -- local player = storage.agent_characters[request_data]
-    -- if not player then
-        -- game.print("No player found for request ID: " .. event.id)
-        -- return
-    -- end
-
-    if event.path then
-        storage.paths[event.id] = event.path
-    elseif event.try_again_later then
-        storage.paths[event.id] = "busy"
-        -- game.print("Pathfinder busy for request ID: " .. event.id)
-    else
-        storage.paths[event.id] = "not_found"
-        -- game.print("Path not found for request ID: " .. event.id)
-    end
-end)
+-- NOTE: on_script_path_request_finished handler is registered in control.lua
+-- Do NOT register script.on_event here - it would overwrite control.lua's handler
+-- and cause multiplayer script mismatch errors on peer join.

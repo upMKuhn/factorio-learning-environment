@@ -1,5 +1,5 @@
 -- Function to get the path as a JSON object
-storage.actions.get_path = function(request_id)
+fle_actions.get_path = function(request_id)
     local request_data = storage.path_requests[request_id]
     if not request_data then
         return helpers.table_to_json({status = "invalid_request"})

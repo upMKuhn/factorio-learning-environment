@@ -30,9 +30,9 @@ local function get_inventory_info(entity)
     return ""
 end
 
-storage.actions.insert_item = function(player_index, insert_item, count, x, y, target_name)
+fle_actions.insert_item = function(player_index, insert_item, count, x, y, target_name)
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
     local position = {x=x, y=y}
     local surface = player.surface
 
@@ -265,7 +265,7 @@ storage.actions.insert_item = function(player_index, insert_item, count, x, y, t
         -- Only remove successfully inserted items from player
         player.remove_item{name=insert_item, count=inserted}
         -- game.print("Successfully inserted " .. inserted .. " items.")
-        return storage.utils.serialize_entity(closest_entity)
+        return fle_utils.serialize_entity(closest_entity)
     else
         local inventory_info = get_inventory_info(closest_entity)
         local error_msg = string.format(

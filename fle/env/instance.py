@@ -504,6 +504,8 @@ class FactorioInstance:
     def initialise(
         self, fast=True, all_technologies_researched=True, clear_entities=True
     ):
+        # Pause game during heavy script loading to prevent multiplayer desync
+        self.rcon_client.send_command("/sc game.tick_paused = true")
         self.rcon_client.send_command(f"/sc storage.fast = {str(fast).lower()}")
         self.first_namespace._create_agent_characters(self.num_agents)
 
@@ -520,7 +522,7 @@ class FactorioInstance:
             self.lua_script_manager.load_init_into_game(script_name)
 
         if self.peaceful:
-            self.rcon_client.send_command("/sc storage.utils.remove_enemies()")
+            self.rcon_client.send_command("/sc fle_utils.remove_enemies()")
 
         # Generate chunks around origin to enable long-distance pathfinding
         # 4000 tiles in each direction = 125 chunks (each chunk is 32x32 tiles)
@@ -535,6 +537,8 @@ class FactorioInstance:
             clear_entities=clear_entities,
         )
         self.first_namespace._clear_collision_boxes()
+        # Unpause after script loading is complete
+        self.rcon_client.send_command("/sc game.tick_paused = false")
 
     def get_warnings(self, seconds=10):
         """
@@ -544,7 +548,7 @@ class FactorioInstance:
         """
         start = timer()
         lua_response = self.rcon_client.send_command(
-            f"/sc rcon.print(dump(storage.get_alerts({seconds})))"
+            f"/sc rcon.print(dump(fle_get_alerts({seconds})))"
         )
         # print(lua_response)
         alert_dict, duration = _lua2python("alerts", lua_response, start=start)

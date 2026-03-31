@@ -1,4 +1,4 @@
-storage.actions.can_place_entity = function(player_index, entity, direction, x, y)
+fle_actions.can_place_entity = function(player_index, entity, direction, x, y)
     local player = storage.agent_characters[player_index]
     local position = {x = x, y = y}
     
@@ -20,7 +20,7 @@ storage.actions.can_place_entity = function(player_index, entity, direction, x, 
     -- Check inventory for the entity
     if player.get_item_count(entity) == 0 then
         local name = entity:gsub(" ", "_"):gsub("-", "_")
-        local inv_contents = storage.utils.format_inventory_for_error(player)
+        local inv_contents = fle_utils.format_inventory_for_error(player)
         error("No " .. name .. " in inventory. Current inventory: " .. inv_contents)
     end
 
@@ -60,7 +60,7 @@ storage.actions.can_place_entity = function(player_index, entity, direction, x, 
 
     ---- Check if the entity can be placed
     ---  if placement fails, it tries 11 different positions (i=0 to 10) by moving the player diagonally
-    local can_build = storage.utils.avoid_entity(player_index, entity, position, direction)
+    local can_build = fle_utils.avoid_entity(player_index, entity, position, direction)
     if not can_build then
         error("Cannot place the entity at the specified position: x="..position.x..", y="..position.y)
     end

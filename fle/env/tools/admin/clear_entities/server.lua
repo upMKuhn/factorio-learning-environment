@@ -1,4 +1,4 @@
-storage.actions.clear_entities = function(player_index)
+fle_actions.clear_entities = function(player_index)
     -- Clear all entities on the entire surface for a given force
     -- No area limitation to ensure complete test isolation
     local function clear_surface_entities(surface, force_filter, player_character)

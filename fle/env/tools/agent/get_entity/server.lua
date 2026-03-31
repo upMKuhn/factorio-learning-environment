@@ -1,6 +1,6 @@
-storage.actions.get_entity = function(player_index, entity, x, y)
+fle_actions.get_entity = function(player_index, entity, x, y)
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
     local position = {x=x, y=y}
 
     if prototypes.entity[entity] == nil then
@@ -40,7 +40,7 @@ storage.actions.get_entity = function(player_index, entity, x, y)
 
     if closest_entity ~= nil then
         local entity = closest_entity  -- get the first entity of the specified type in the area
-        local serialized = storage.utils.serialize_entity(entity)
+        local serialized = fle_utils.serialize_entity(entity)
         --local entity_json = game.table_to_json(serialized)-- game.table_to_json(entity
         return serialized
     else

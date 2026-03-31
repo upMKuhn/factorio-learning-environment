@@ -98,7 +98,7 @@ local function add_clearance_entities(surface, force, region, start_pos, end_pos
 
     -- Collect positions from boilers
     for _, boiler in pairs(entities.boilers) do
-        for _, pos in pairs(storage.utils.get_boiler_connection_points(boiler)) do
+        for _, pos in pairs(fle_utils.get_boiler_connection_points(boiler)) do
             if not is_excluded_position(pos) then
                 table.insert(all_positions, pos)
             end
@@ -107,7 +107,7 @@ local function add_clearance_entities(surface, force, region, start_pos, end_pos
 
     -- Collect positions from pumpjacks
     for _, pumpjack in pairs(entities.pumpjacks) do
-        for _, pos in pairs(storage.utils.get_pumpjack_connection_points(pumpjack)) do
+        for _, pos in pairs(fle_utils.get_pumpjack_connection_points(pumpjack)) do
             if not is_excluded_position(pos) then
                 table.insert(all_positions, pos)
             end
@@ -116,7 +116,7 @@ local function add_clearance_entities(surface, force, region, start_pos, end_pos
 
     -- Collect positions from refineries
     for _, refinery in pairs(entities.refineries) do
-        for _, pos in pairs(storage.utils.get_refinery_connection_points(refinery)) do
+        for _, pos in pairs(fle_utils.get_refinery_connection_points(refinery)) do
             if not is_excluded_position(pos) then
                 table.insert(all_positions, pos)
             end
@@ -125,7 +125,7 @@ local function add_clearance_entities(surface, force, region, start_pos, end_pos
 
     -- Collect positions from chemical plants
     for _, plant in pairs(entities.chemical_plants) do
-        for _, pos in pairs(storage.utils.get_chemical_plant_connection_points(plant)) do
+        for _, pos in pairs(fle_utils.get_chemical_plant_connection_points(plant)) do
             if not is_excluded_position(pos) then
                 table.insert(all_positions, pos)
             end
@@ -134,7 +134,7 @@ local function add_clearance_entities(surface, force, region, start_pos, end_pos
 
      -- Collect positions from storage tanks
     for _, tank in pairs(entities.storage_tanks) do
-        for _, pos in pairs(storage.utils.get_storage_tank_connection_points(tank)) do
+        for _, pos in pairs(fle_utils.get_storage_tank_connection_points(tank)) do
             if not is_excluded_position(pos) then
                 table.insert(all_positions, pos)
             end
@@ -177,7 +177,7 @@ local function add_clearance_entities(surface, force, region, start_pos, end_pos
     return created_entities
 end
 
-storage.actions.extend_collision_boxes = function(player_index, start_x, start_y, goal_x, goal_y)
+fle_actions.extend_collision_boxes = function(player_index, start_x, start_y, goal_x, goal_y)
     local player = storage.agent_characters[player_index]
     local start_pos = {x=start_x, y=start_y}
     local end_pos = {x=goal_x, y=goal_y}

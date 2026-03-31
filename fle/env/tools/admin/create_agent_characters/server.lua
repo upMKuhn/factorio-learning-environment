@@ -30,15 +30,12 @@ local function generate_agent_color(index, total_agents)
 end
 
 -- Create agent characters script
-storage.actions.create_agent_characters = function(num_agents)
-    -- delete all character entities on the surface
+fle_actions.create_agent_characters = function(num_agents)
+    -- delete all unowned character entities on the surface (preserve human players)
     for _, entity in pairs(game.surfaces[1].find_entities_filtered{type = "character"}) do
-        entity.destroy()
-    end
-
-    -- Initialize agent characters table
-    for _, entity in pairs(game.surfaces[1].find_entities_filtered{type = "character"}) do
-        entity.destroy()
+        if not entity.player then
+            entity.destroy()
+        end
     end
     -- Destroy existing agent characters if they exist
     if storage.agent_characters then

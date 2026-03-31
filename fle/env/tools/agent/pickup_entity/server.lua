@@ -1,6 +1,6 @@
-storage.actions.pickup_entity = function(player_index, x, y, entity)
+fle_actions.pickup_entity = function(player_index, x, y, entity)
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
     local position = {x=x, y=y}
     local surface = player.surface
     local success = false
@@ -40,7 +40,7 @@ storage.actions.pickup_entity = function(player_index, x, y, entity)
 
                 -- Add chest contents if applicable
                 if ent.get_inventory(defines.inventory.chest) then
-                    local chest_contents = storage.utils.get_contents_compat(ent.get_inventory(defines.inventory.chest))
+                    local chest_contents = fle_utils.get_contents_compat(ent.get_inventory(defines.inventory.chest))
                     for name, count in pairs(chest_contents) do
                         table.insert(items_to_insert, {name=name, count=count})
                     end
@@ -50,14 +50,14 @@ storage.actions.pickup_entity = function(player_index, x, y, entity)
                 if ent.type == "transport-belt" then
                     -- Check line 1
                     local line1 = ent.get_transport_line(1)
-                    local contents1 = storage.utils.get_contents_compat(line1)
+                    local contents1 = fle_utils.get_contents_compat(line1)
                     for name, count in pairs(contents1) do
                         table.insert(items_to_insert, {name=name, count=count})
                     end
 
                     -- Check line 2
                     local line2 = ent.get_transport_line(2)
-                    local contents2 = storage.utils.get_contents_compat(line2)
+                    local contents2 = fle_utils.get_contents_compat(line2)
                     for name, count in pairs(contents2) do
                         table.insert(items_to_insert, {name=name, count=count})
                     end

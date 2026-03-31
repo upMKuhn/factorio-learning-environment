@@ -131,7 +131,7 @@ def grid_to_machine(grid: np.ndarray, scale: int = 8) -> Image.Image:
                 info = ENTITY_REGISTRY.from_id(type_id)
                 base = CATEGORY_COLORS.get(info.category, (128, 128, 128))
                 direction = int(grid[gy, gx, 1])
-                shift = (direction % 4) * 10 - 15
+                shift = (direction // 4 % 4) * 10 - 15
                 color = tuple(max(0, min(255, c + shift)) for c in base)
 
             x0 = gx * scale

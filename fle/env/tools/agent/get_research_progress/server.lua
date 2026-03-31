@@ -1,4 +1,4 @@
-storage.actions.get_research_progress = function(player_index, technology_name)
+fle_actions.get_research_progress = function(player_index, technology_name)
     local player = storage.agent_characters[player_index]
     local force = player.force
 

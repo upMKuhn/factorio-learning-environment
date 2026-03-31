@@ -138,9 +138,9 @@ local function validate_mining_drill_placement(surface, position, entity_name)
 end
 
 
-storage.actions.place_entity_next_to = function(player_index, entity, ref_x, ref_y, direction, gap)
+fle_actions.place_entity_next_to = function(player_index, entity, ref_x, ref_y, direction, gap)
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
     local ref_position = {x = ref_x, y = ref_y}
 
     local function table_contains(tbl, element)
@@ -360,7 +360,7 @@ storage.actions.place_entity_next_to = function(player_index, entity, ref_x, ref
                     local alt_clear = player.surface.can_place_entity({
                         name = entity,
                         position = alt_pos,
-                        direction = storage.utils.get_entity_direction(entity, alt_factorio_direction),
+                        direction = fle_utils.get_entity_direction(entity, alt_factorio_direction),
                         force = player.force
                     })
 
@@ -372,7 +372,7 @@ storage.actions.place_entity_next_to = function(player_index, entity, ref_x, ref
                         direction = alt_factorio_direction
 
                         -- Update orientation for the new direction
-                        orientation = storage.utils.get_entity_direction(entity, direction)
+                        orientation = fle_utils.get_entity_direction(entity, direction)
                         
                         
                         goto alternative_found
@@ -403,7 +403,7 @@ storage.actions.place_entity_next_to = function(player_index, entity, ref_x, ref
     
     ::alternative_found::
 
-    orientation = storage.utils.get_entity_direction(entity, direction)
+    orientation = fle_utils.get_entity_direction(entity, direction)
 
     if ref_entity then
         local prototype = prototypes.entity[ref_entity.name]
@@ -487,7 +487,7 @@ storage.actions.place_entity_next_to = function(player_index, entity, ref_x, ref
         time_to_live = 60000
     })
 
-    storage.utils.avoid_entity(player_index, entity, new_position, direction)
+    fle_utils.avoid_entity(player_index, entity, new_position, direction)
 
     local can_build = player.surface.can_place_entity({
         name = entity,
@@ -542,14 +542,14 @@ storage.actions.place_entity_next_to = function(player_index, entity, ref_x, ref
         error("Failed to create entity " .. entity .. " at position " .. serpent.line(new_position))
     end
 
-    local placement_info = storage.utils.serialize_entity(new_entity)
+    local placement_info = fle_utils.serialize_entity(new_entity)
     
     local item_stack = {name = entity, count = 1}
     if player.get_main_inventory().can_insert(item_stack) then
         player.get_main_inventory().remove(item_stack)
         return placement_info
     else
-        local inv_contents = storage.utils.format_inventory_for_error(player)
+        local inv_contents = fle_utils.format_inventory_for_error(player)
         error("Not enough " .. entity .. " in inventory. Current inventory: " .. inv_contents)
     end
 end

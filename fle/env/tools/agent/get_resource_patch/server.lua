@@ -1,4 +1,4 @@
-storage.actions.get_resource_patch = function(player_index, resource, x, y, radius)
+fle_actions.get_resource_patch = function(player_index, resource, x, y, radius)
     local player = storage.agent_characters[player_index]
     local position = {x = x, y = y}
     local surface = player.surface

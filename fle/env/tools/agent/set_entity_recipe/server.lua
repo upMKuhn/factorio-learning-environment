@@ -1,4 +1,4 @@
-storage.actions.set_entity_recipe = function(player_index, recipe_name, x, y)
+fle_actions.set_entity_recipe = function(player_index, recipe_name, x, y)
     local player = storage.agent_characters[player_index]
     local surface = player.surface
     --local position = player.position
@@ -27,14 +27,14 @@ storage.actions.set_entity_recipe = function(player_index, recipe_name, x, y)
             -- Factorio 2.0: all inserters can filter, enable filtering and set the filter
             closest_building.use_filters = true
             closest_building.set_filter(1, recipe_name)  -- Set first filter slot
-            serialized = storage.utils.serialize_entity(closest_building)
+            serialized = fle_utils.serialize_entity(closest_building)
         else
             -- Original assembling machine logic
             local recipe = player.force.recipes[recipe_name]
             if recipe and closest_building.get_recipe() ~= recipe then
                 closest_building.set_recipe(recipe_name)
             end
-            serialized = storage.utils.serialize_entity(closest_building)
+            serialized = fle_utils.serialize_entity(closest_building)
         end
 
         local entity_json = helpers.table_to_json(serialized)

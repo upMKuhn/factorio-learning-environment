@@ -91,7 +91,7 @@ local function rotate_coordinates(x_offset, y_offset, direction)
     end
 end
 
-storage.utils.get_refinery_fluid_mappings = function(entity, recipe)
+fle_utils.get_refinery_fluid_mappings = function(entity, recipe)
     if not entity or not recipe then return nil end
     if not entity.position then return nil end
 
@@ -132,7 +132,7 @@ storage.utils.get_refinery_fluid_mappings = function(entity, recipe)
 end
 
 -- Helper function to map connection points to fluid types for chemical plant
-storage.utils.get_chemical_plant_fluid_mappings = function(entity, recipe)
+fle_utils.get_chemical_plant_fluid_mappings = function(entity, recipe)
     if not entity or not recipe then return nil end
     if not entity.position then return nil end
 

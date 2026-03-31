@@ -63,7 +63,7 @@ This hotfix resolves direction-related test failures introduced in v0.4.0. The i
 
 ### 🎮 Factorio 2.0 Migration
 
-This is a major release that migrates FLE from Factorio 1.1.110 to **Factorio 2.0.73**, addressing all breaking API changes and ensuring full compatibility with the latest version of Factorio. This release includes comprehensive updates across ~180 files with enhanced test coverage and improved reliability.
+This is a major release that migrates FLE from Factorio 1.1.110 to **Factorio 2.0.76**, addressing all breaking API changes and ensuring full compatibility with the latest version of Factorio. This release includes comprehensive updates across ~180 files with enhanced test coverage and improved reliability.
 
 ### Added
 
@@ -86,7 +86,7 @@ This is a major release that migrates FLE from Factorio 1.1.110 to **Factorio 2.
 
 ### Changed
 
-- **Docker Image**: Updated from `factoriotools/factorio:1.1.x` to `factoriotools/factorio:2.0.73`
+- **Docker Image**: Updated from `factoriotools/factorio:1.1.x` to `factoriotools/factorio:2.0.76`
 
 - **Direction System**: Complete overhaul for Factorio 2.0's 16-direction system
   - `DirectionInternal` enum updated: `UP=0, RIGHT=4, DOWN=8, LEFT=12` (was 0,2,4,6 in 1.1)
@@ -154,8 +154,8 @@ This is a major release that migrates FLE from Factorio 1.1.110 to **Factorio 2.
 ⚠️ **This release includes significant breaking changes for users upgrading from v0.3.x:**
 
 1. **Factorio Version Requirement**
-   - **Now requires Factorio 2.0.73 or later** (was 1.1.110)
-   - Docker image updated to `factoriotools/factorio:2.0.73`
+   - **Now requires Factorio 2.0.76 or later** (was 1.1.110)
+   - Docker image updated to `factoriotools/factorio:2.0.76`
 
 2. **Direction Values**
    - If you're working with raw direction values, they now use the 16-direction system (0,4,8,12 for N,E,S,W)
@@ -181,14 +181,14 @@ This is a major release that migrates FLE from Factorio 1.1.110 to **Factorio 2.
 
 If you're upgrading from FLE v0.3.x to v0.4.0:
 
-1. **Update Factorio**: Install Factorio 2.0.73 or later from [factorio.com](https://www.factorio.com/)
+1. **Update Factorio**: Install Factorio 2.0.76 or later from [factorio.com](https://www.factorio.com/)
 
 2. **Update FLE**:
    ```bash
    pip install --upgrade factorio-learning-environment
    ```
 
-3. **Docker Users**: The Docker image will automatically use `factoriotools/factorio:2.0.73`
+3. **Docker Users**: The Docker image will automatically use `factoriotools/factorio:2.0.76`
 
 4. **Code Changes**: Most agent code should work without changes due to the conversion layers. However, review your code if you:
    - Directly access direction values (use `Direction` enum instead)
@@ -200,7 +200,7 @@ If you're upgrading from FLE v0.3.x to v0.4.0:
 
 If you're developing against FLE:
 
-1. **Test Suite**: All 385+ tests now pass with Factorio 2.0.73
+1. **Test Suite**: All 385+ tests now pass with Factorio 2.0.76
    ```bash
    fle cluster start -n 4
    pytest -n 4 --dist=load -v

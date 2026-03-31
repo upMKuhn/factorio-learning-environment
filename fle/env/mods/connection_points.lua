@@ -2,7 +2,7 @@
 -- This is to prevent bad cases where connections are blocked by belts / pipes etc.
 
 -- Function to get connection points for storage tanks based on their direction
-storage.utils.get_storage_tank_connection_points = function(entity)
+fle_utils.get_storage_tank_connection_points = function(entity)
     local x, y = entity.position.x, entity.position.y
     local connection_points = {}
 
@@ -33,7 +33,7 @@ storage.utils.get_storage_tank_connection_points = function(entity)
     return connection_points
 end
 
-storage.utils.get_chemical_plant_connection_points = function(plant)
+fle_utils.get_chemical_plant_connection_points = function(plant)
     local positions = {}
     local x, y = plant.position.x, plant.position.y
 
@@ -71,7 +71,7 @@ storage.utils.get_chemical_plant_connection_points = function(plant)
 end
 
 
-storage.utils.get_generator_connection_positions = function(entity)
+fle_utils.get_generator_connection_positions = function(entity)
     local x, y = entity.position.x, entity.position.y
     local orientation = entity.orientation
     local entity_prototype = prototypes.entity[entity.name]
@@ -116,7 +116,7 @@ storage.utils.get_generator_connection_positions = function(entity)
     return pipe_positions
 end
 
-storage.utils.get_pumpjack_connection_points = function(entity)
+fle_utils.get_pumpjack_connection_points = function(entity)
     local x, y = entity.position.x, entity.position.y
     local orientation = entity.orientation
 
@@ -136,7 +136,7 @@ storage.utils.get_pumpjack_connection_points = function(entity)
     return pipe_position
 end
 
-storage.utils.get_boiler_connection_points = function(entity)
+fle_utils.get_boiler_connection_points = function(entity)
     local x, y = entity.position.x, entity.position.y
     -- Factorio 2.0: orientation is 0, 0.25, 0.5, 0.75 for cardinals
     -- defines.direction values are 0, 4, 8, 12 (16-direction system)
@@ -200,7 +200,7 @@ storage.utils.get_boiler_connection_points = function(entity)
     --return pipe_positions
 end
 
-storage.utils.get_offshore_pump_connection_points = function(entity)
+fle_utils.get_offshore_pump_connection_points = function(entity)
     local x, y = entity.position.x, entity.position.y
     -- Factorio 2.0: orientation is 0, 0.25, 0.5, 0.75 for cardinals
     -- defines.direction values are 0, 4, 8, 12 (16-direction system)
@@ -224,7 +224,7 @@ storage.utils.get_offshore_pump_connection_points = function(entity)
     return { {x = x + dx, y = y + dy} }
 end
 
-storage.utils.get_refinery_connection_points = function(refinery)
+fle_utils.get_refinery_connection_points = function(refinery)
     -- Block the middle input point also
     local positions = {}
     local x, y = refinery.position.x, refinery.position.y

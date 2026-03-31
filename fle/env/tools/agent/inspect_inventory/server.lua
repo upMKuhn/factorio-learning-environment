@@ -1,7 +1,7 @@
-storage.actions.inspect_inventory = function(player_index, is_character_inventory, x, y, entity, all_players)
+fle_actions.inspect_inventory = function(player_index, is_character_inventory, x, y, entity, all_players)
     local position = {x=x, y=y}
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
     local surface = player.surface
     local is_fast = storage.fast
     local automatic_close = True
@@ -13,7 +13,7 @@ storage.actions.inspect_inventory = function(player_index, is_character_inventor
            return nil
        end
 
-       local item_counts = storage.utils.get_contents_compat(inventory)
+       local item_counts = fle_utils.get_contents_compat(inventory)
        return item_counts
     end
 
@@ -43,14 +43,12 @@ storage.actions.inspect_inventory = function(player_index, is_character_inventor
 
        if not is_fast then
            player.opened = closest_entity
-           script.on_nth_tick(60, function()
-               if automatic_close == True then
-                   if closest_entity and closest_entity.valid then
-                       player.opened = nil
-                   end
-                   automatic_close = False
+           fle_actions.on_nth_tick_60 = function(event)
+               fle_actions.on_nth_tick_60 = nil  -- Clear after first call
+               if closest_entity and closest_entity.valid then
+                   player.opened = nil
                end
-           end)
+           end
        end
 
        -- Factorio 2.0: unified crafter_input/crafter_output for furnaces, assemblers, rocket silos
@@ -58,8 +56,8 @@ storage.actions.inspect_inventory = function(player_index, is_character_inventor
            if not closest_entity or not closest_entity.valid then
                error("No valid entity at given coordinates.")
            end
-           local source = storage.utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.crafter_input))
-           local output = storage.utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.crafter_output))
+           local source = fle_utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.crafter_input))
+           local output = fle_utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.crafter_output))
            for k, v in pairs(output) do
                source[k] = (source[k] or 0) + v
            end
@@ -69,13 +67,13 @@ storage.actions.inspect_inventory = function(player_index, is_character_inventor
            if not closest_entity or not closest_entity.valid then
                error("No valid entity at given coordinates.")
            end
-           return storage.utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.lab_input))
+           return fle_utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.lab_input))
        end
        -- Note: centrifuge is now handled by the unified assembling-machine block above
        if not closest_entity or not closest_entity.valid then
            error("No valid entity at given coordinates.")
        end
-       return storage.utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.chest))
+       return fle_utils.get_contents_compat(closest_entity.get_inventory(defines.inventory.chest))
     end
 
     local player = storage.agent_characters[player_index]

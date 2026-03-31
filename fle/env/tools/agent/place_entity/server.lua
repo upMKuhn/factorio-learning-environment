@@ -106,16 +106,16 @@ local function find_offshore_pump_position(player, center_pos)
     return nil
 end
 
-storage.actions.place_entity = function(player_index, entity, direction, x, y, exact)
+fle_actions.place_entity = function(player_index, entity, direction, x, y, exact)
     -- Ensure we have a valid character, recreating if necessary
-    local player = storage.utils.ensure_valid_character(player_index)
+    local player = fle_utils.ensure_valid_character(player_index)
     local position = {x = x, y = y}
 
     if not direction then
         direction = 0
     end
 
-    local entity_direction = storage.utils.get_entity_direction(entity, direction)
+    local entity_direction = fle_utils.get_entity_direction(entity, direction)
 
     -- Common validation functions
     local function validate_distance()
@@ -144,7 +144,7 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
         local count = player.get_item_count(entity)
         if count == 0 then
             local name = entity:gsub(" ", "_"):gsub("-", "_")
-            local inv_contents = storage.utils.format_inventory_for_error(player)
+            local inv_contents = fle_utils.format_inventory_for_error(player)
             error("\"No " .. name .. " in inventory. Current inventory: " .. inv_contents .. "\"")
         end
     end
@@ -157,16 +157,16 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
         -- Select the target position
         player.update_selected_entity(position)
 
-        -- Schedule the actual placement after delay
-        script.on_nth_tick(60, function(event)  -- 30 ticks = 0.5 seconds
-            script.on_nth_tick(60, nil)  -- Clear the scheduled event
- 
+        -- Schedule the actual placement via on_nth_tick(60) dispatcher in control.lua
+        fle_actions.on_nth_tick_60 = function(event)
+            fle_actions.on_nth_tick_60 = nil  -- Clear after first call
+
             -- Verify conditions are still valid
             validate_distance()
             validate_inventory()
 
             -- Avoid entity at target position
-            storage.utils.avoid_entity(player_index, entity, position)
+            fle_utils.avoid_entity(player_index, entity, position)
 
             -- Perform the actual placement
             local placed_entity = player.surface.create_entity{
@@ -179,11 +179,11 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
             if placed_entity then
                 player.remove_item{name = entity, count = 1}
                 player.cursor_ghost = nil  -- Clear the ghost
-                return storage.utils.serialize_entity(placed_entity)
+                return fle_utils.serialize_entity(placed_entity)
             else
                 error("\"Failed to place entity after delay\"")
             end
-        end)
+        end
 
         return { pending = true }
     end
@@ -223,9 +223,9 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
                 end
             end
         end
-        storage.utils.avoid_entity(player_index, entity, position, direction)
+        fle_utils.avoid_entity(player_index, entity, position, direction)
         -- Use surface based validation equivalent to LuaPlayer.can_place_entity
-        local can_build = storage.utils.can_place_entity(player, entity, position, entity_direction)
+        local can_build = fle_utils.can_place_entity(player, entity, position, entity_direction)
 
         if not can_build then
             if not exact then
@@ -237,7 +237,7 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
                     local pos_dir = find_offshore_pump_position(player, position)
                     if pos_dir then
                         -- Factorio 2.0: direction is already in 16-direction format, no division needed
-                        entity_direction = storage.utils.get_entity_direction(entity, pos_dir['direction'])
+                        entity_direction = fle_utils.get_entity_direction(entity, pos_dir['direction'])
                         new_position = pos_dir['position']
                         found_position = true
                     end
@@ -251,8 +251,8 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
                             for dy = -radius, radius do
                                 if dx == -radius or dx == radius or dy == -radius or dy == radius then
                                     new_position = {x = position.x + dx, y = position.y + dy}
-                                    storage.utils.avoid_entity(player_index, entity, position, direction)
-                                    can_build = storage.utils.can_place_entity(player, entity, new_position, entity_direction)
+                                    fle_utils.avoid_entity(player_index, entity, position, direction)
+                                    can_build = fle_utils.can_place_entity(player, entity, new_position, entity_direction)
                                     if can_build then
                                         found_position = true
                                         break
@@ -275,7 +275,7 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
                     if have_built then
                         player.remove_item{name = entity, count = 1}
                         -- game.print("Placed " .. entity .. " at " .. new_position.x .. ", " .. new_position.y)
-                        return storage.actions.get_entity(player_index, entity, new_position.x, new_position.y)
+                        return fle_actions.get_entity(player_index, entity, new_position.x, new_position.y)
                     end
                 else
                     error("\"Could not find a suitable position to place " .. entity .. " near the target location.\"")
@@ -299,9 +299,9 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
                 end
             end
 
-            storage.utils.avoid_entity(player_index, entity, position, direction)
+            fle_utils.avoid_entity(player_index, entity, position, direction)
 
-            can_build = storage.utils.can_place_entity(player, entity, position, entity_direction)
+            can_build = fle_utils.can_place_entity(player, entity, position, entity_direction)
 
             if not can_build then
                 local entity_prototype = prototypes.entity[entity]
@@ -394,7 +394,7 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
             local entities = player.surface.find_entities_filtered{area = target_area, name = entity}
 
             if #entities > 0 then
-                return storage.utils.serialize_entity(entities[1])
+                return fle_utils.serialize_entity(entities[1])
             end
             error("\"Could not find placed entity\"")
         else
@@ -444,7 +444,7 @@ storage.actions.place_entity = function(player_index, entity, direction, x, y, e
     validate_distance()
     validate_entity()
     validate_inventory()
-    storage.utils.avoid_entity(player_index, entity, position)
+    fle_utils.avoid_entity(player_index, entity, position)
 
     -- Choose placement method based on storage.fast setting
     if storage.fast then

@@ -350,7 +350,7 @@ if scores then
     storage.initial_score = scores
 end
 
-storage.actions.score = function()
+fle_actions.score = function()
     local prod_score = production_score.get_production_scores()
     prod_score["player"] = prod_score["player"] - storage.initial_score["player"]
     
