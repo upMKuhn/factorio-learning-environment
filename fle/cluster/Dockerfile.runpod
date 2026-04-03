@@ -1,0 +1,14 @@
+FROM factoriotools/factorio:2.0.76
+
+# Copy FLE scenarios, config, mods
+COPY scenarios/ /opt/factorio/scenarios/
+COPY config/ /opt/factorio/config/
+COPY mods/ /opt/factorio/mods/
+
+# RCON port for FLE
+EXPOSE 27015/tcp
+# Game port
+EXPOSE 34197/udp
+
+ENTRYPOINT []
+CMD ["/bin/sh", "-c", "rm -rf /opt/factorio/data/elevated-rails /opt/factorio/data/quality /opt/factorio/data/space-age && exec /bin/box64 /opt/factorio/bin/x64/factorio --start-server-load-scenario open_world --port 34197 --server-settings /opt/factorio/config/server-settings.json --map-gen-settings /opt/factorio/config/map-gen-settings.json --map-settings /opt/factorio/config/map-settings.json --rcon-port 27015 --rcon-password factorio --mod-directory /opt/factorio/mods --map-gen-seed 44340"]
