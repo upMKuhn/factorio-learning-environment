@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict
 
 from fle.grid_codec.grid import Vocabulary
 
 
-@dataclass(frozen=True)
-class RecipeData:
+class RecipeData(BaseModel):
     """Recipes from a Factorio data export (e.g. data/spa/data.json) and the grid vocabulary built from them."""
+    model_config = ConfigDict(frozen=True)
+
     recipes: dict[str, dict]        # recipe → {"in_": {item: n}, "out": {item: n}, "producers": [...]}
     recipe_times: dict[str, float]  # recipe → seconds per craft
 

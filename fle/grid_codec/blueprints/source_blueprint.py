@@ -2,18 +2,28 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, PlainValidator
 
 
-@dataclass(frozen=True)
-class SourceBlueprint:
+def _entity_dicts(entities: object) -> list[dict]:
+    """A list of dicts, kept as is: pydantic's own list[dict] validation copies every raw entity."""
+    if not (isinstance(entities, list) and all(isinstance(e, dict) for e in entities)):
+        raise ValueError("entities must be a list of dicts")
+    return entities
+
+
+class SourceBlueprint(BaseModel):
     """One blueprint as read from a source, entities still in Factorio's (or synthetic grid) form."""
+    model_config = ConfigDict(frozen=True)
+
     label: str
-    entities: list[dict]
-    version: int | None = None     # packed game version; None for synthetic data, treated as 2.x
-    book: str = ""                 # enclosing book labels, "outer / inner"
-    tags: tuple[str, ...] = field(default=())
-    favorites: int = 0
+    entities: Annotated[list[dict], PlainValidator(_entity_dicts)]  # raw; BlueprintNormalizer checks contents
+    version: int | None = None      # packed game version; None for synthetic data, treated as 2.x
+    book: str = ""                  # enclosing book labels, "outer / inner"
+    tags: tuple[str, ...] = ()
+    favorites: int = Field(0, ge=0)
 
     @property
     def major_version(self) -> int:
@@ -40,7 +50,7 @@ class SourceBlueprint:
     def from_dict(cls, d: dict) -> SourceBlueprint:
         """From the legacy dict form ({label, entities, version?, book?, tags?, favorites?})."""
         return cls(label=d.get("label", ""), entities=d.get("entities", []), version=d.get("version"),
-                   book=d.get("book", ""), tags=tuple(d.get("tags", ())), favorites=d.get("favorites", 0))
+                   book=d.get("book", ""), tags=d.get("tags", ()), favorites=d.get("favorites", 0))
 
     def to_dict(self) -> dict:
         return {"label": self.label, "book": self.book, "tags": list(self.tags), "favorites": self.favorites,

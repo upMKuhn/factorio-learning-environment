@@ -38,7 +38,7 @@ class BlueprintNormalizer:
         conventions = VersionConventions.for_version(bp.version)
         resolved = self._resolve(bp.entities, conventions)
         placed = self._place(resolved)
-        layout = Layout(tuple(placed), bp).at_origin()
+        layout = Layout(placed, bp)
         if overlap := layout.overlapping_tiles():
             names = sorted({e.name for e in layout.entities_on(overlap)})
             raise BlueprintRejected("overlapping tiles", names)
@@ -69,7 +69,8 @@ class BlueprintNormalizer:
             raise BlueprintRejected("unknown recipe", sorted(unknown_recipes))
         return resolved
 
-    def _place(self, resolved: list[tuple]) -> list[EntitySpec]:
+    def _place(self, resolved: list[tuple]) -> tuple[EntitySpec, ...]:
+        """Top-left tiles, shifted so the smallest x and y are 0."""
         # Footprint corner in world units for centre-positioned entities; None for grid-form ones.
         corners = []
         for info, e, direction, _, _ in resolved:
@@ -82,14 +83,11 @@ class BlueprintNormalizer:
                          for (info, *_), c in zip(resolved, corners) if c and not info.off_grid)
         fx, fy = phases.most_common(1)[0][0] if phases else (0.0, 0.0)
 
-        placed = []
-        for (info, e, direction, recipe, io_type), corner in zip(resolved, corners):
-            if corner:
-                x, y = self._tile(corner[0] - fx, info), self._tile(corner[1] - fy, info)
-            else:
-                x, y = e["x"], e["y"]
-            placed.append(EntitySpec(info.name, x, y, direction, recipe=recipe, io_type=io_type))
-        return placed
+        tiles = [(self._tile(corner[0] - fx, info), self._tile(corner[1] - fy, info)) if corner else (e["x"], e["y"])
+                 for (info, e, *_), corner in zip(resolved, corners)]
+        min_x, min_y = min(x for x, _ in tiles), min(y for _, y in tiles)
+        return tuple(EntitySpec(info.name, x - min_x, y - min_y, direction, recipe=recipe, io_type=io_type)
+                     for (info, _, direction, recipe, io_type), (x, y) in zip(resolved, tiles))
 
     @staticmethod
     def _frac(v: float) -> float:

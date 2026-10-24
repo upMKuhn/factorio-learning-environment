@@ -3,23 +3,39 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import Counter
-from dataclasses import dataclass, field
 from functools import cached_property
+from typing import Iterator
+
+from pydantic import BaseModel, ConfigDict
 
 from fle.grid_codec.blueprints.source_blueprint import SourceBlueprint
 from fle.grid_codec.grid import BoundingBox, EntitySpec
 
 
-@dataclass(frozen=True)
-class Layout:
-    """Normalized entities on integer tiles (top-left of each footprint), plus where they came from."""
+class Layout(BaseModel):
+    """
+    Normalized entities on integer tiles (top-left of each footprint), plus where they came from.
+
+    Equality and hashing look at the entities only, not the source.
+    """
+    model_config = ConfigDict(frozen=True)
+
     entities: tuple[EntitySpec, ...]
-    source: SourceBlueprint | None = field(default=None, compare=False)
+    source: SourceBlueprint | None = None
+
+    def __init__(self, entities: tuple[EntitySpec, ...] = (), source: SourceBlueprint | None = None):
+        super().__init__(entities=entities, source=source)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Layout) and self.entities == other.entities
+
+    def __hash__(self) -> int:
+        return hash(self.entities)
 
     def __len__(self) -> int:
         return len(self.entities)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[EntitySpec]:  # type: ignore[override]
         return iter(self.entities)
 
     def overlapping_tiles(self) -> set[tuple[int, int]]:
@@ -34,6 +50,8 @@ class Layout:
         return BoundingBox.from_entities(self.entities, padding=padding)
 
     def translated(self, dx: int, dy: int) -> Layout:
+        if dx == dy == 0:
+            return self  # immutable, so no copy needed
         return Layout(tuple(EntitySpec(e.name, e.x + dx, e.y + dy, e.direction, e.meta_override, e.recipe, e.io_type)
                             for e in self.entities), self.source)
 

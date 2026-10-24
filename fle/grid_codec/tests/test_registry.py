@@ -4,8 +4,9 @@ import json
 import math
 
 import pytest
+from pydantic import ValidationError
 
-from fle.grid_codec.registry import ENTITY_REGISTRY, EntityInfo, EntityRegistry, Meta
+from fle.grid_codec.registry import ENTITY_REGISTRY, EntityInfo, EntityRegistry, Footprint, Meta
 from fle.grid_codec.tests.conftest import PROTOTYPE_DUMP
 
 # Existing datasets store these ids; this list may only ever grow.
@@ -68,8 +69,8 @@ def test_lookup_both_ways():
 def test_registry_rejects_duplicate_ids():
     with pytest.raises(ValueError):
         EntityRegistry([
-            EntityInfo(id=1, name="a", width=1, height=1, meta=Meta.NONE, category="x"),
-            EntityInfo(id=1, name="b", width=1, height=1, meta=Meta.NONE, category="x"),
+            EntityInfo(id=1, name="a", width=1, height=1, meta=Meta.NONE, category="special"),
+            EntityInfo(id=1, name="b", width=1, height=1, meta=Meta.NONE, category="special"),
         ])
 
 
@@ -81,12 +82,12 @@ def test_registry_rejects_duplicate_ids():
     ("boiler", 4, (2, 3)), ("assembling-machine-2", 4, (3, 3)),
 ])
 def test_footprint_rotates_with_direction(name, direction, expected):
-    assert ENTITY_REGISTRY.from_name(name).footprint(direction) == expected
+    assert ENTITY_REGISTRY.from_name(name).footprint(direction) == Footprint(*expected)
 
 
 def test_offshore_pump_is_one_tile():
     # 2.0 prototype: tile_width = tile_height = 1; blueprints anchor it on a single tile.
-    assert ENTITY_REGISTRY.from_name("offshore-pump").footprint(0) == (1, 1)
+    assert ENTITY_REGISTRY.from_name("offshore-pump").footprint(0) == Footprint(1, 1)
 
 
 def test_only_land_mine_is_placed_off_grid():
@@ -127,3 +128,39 @@ def test_conduits_are_belts_and_pipes():
     conduits = {e.name for e in ENTITY_REGISTRY.all_entities() if e.carries_contents}
     assert {"transport-belt", "express-underground-belt", "turbo-splitter", "pipe", "pipe-to-ground"} <= conduits
     assert not conduits & {"chemical-plant", "inserter", "storage-tank", "pump", "belt-group", "pipe-group"}
+
+
+# ── Models ────────────────────────────────────────────────────────────────────
+
+def test_entity_info_is_frozen_and_hashable():
+    info = ENTITY_REGISTRY.from_name("stone-furnace")
+    with pytest.raises(ValidationError):
+        info.width = 3
+    assert hash(info) == hash(info.model_copy())
+    assert info == info.model_copy() and info.is_multi_tile
+
+
+@pytest.mark.parametrize("field, value", [
+    ("width", 0), ("height", -1), ("id", -1), ("id", 2 ** 16), ("category", "unknown"),
+])
+def test_entity_info_validates_fields(field, value):
+    fields = dict(id=1, name="a", width=1, height=1, meta=Meta.NONE, category="special")
+    with pytest.raises(ValidationError):
+        EntityInfo(**{**fields, field: value})
+
+
+def test_footprint_unpacks_like_a_pair():
+    w, h = ENTITY_REGISTRY.from_name("steam-engine").footprint(4)
+    assert (w, h) == (5, 3)
+    footprint = Footprint(2, 3)
+    assert footprint.area == 6
+    assert list(footprint.tiles(1, 1)) == [(1, 1), (2, 1), (1, 2), (2, 2), (1, 3), (2, 3)]
+
+
+def test_footprint_is_frozen_and_validated():
+    footprint = Footprint(width=2, height=1)
+    with pytest.raises(ValidationError):
+        footprint.width = 3
+    assert hash(footprint) == hash(Footprint(2, 1))
+    with pytest.raises(ValidationError):
+        Footprint(0, 1)

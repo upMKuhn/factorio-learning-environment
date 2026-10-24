@@ -11,18 +11,18 @@ from __future__ import annotations
 import base64
 import json
 import zlib
-from dataclasses import dataclass, field
+
+from pydantic import BaseModel
 
 from fle.grid_codec.encoder import EntitySpec
 
 
-@dataclass
-class Blueprint:
+class Blueprint(BaseModel):
     """A decoded Factorio blueprint with metadata."""
     label: str
     description: str
     entities: list[EntitySpec]
-    tags: list[str] = field(default_factory=list)
+    tags: list[str] = []
     source_key: str = ""              # factorioprints key e.g. "-KnQ865j-qQ21WoUPbd3"
     favorites: int = 0
 

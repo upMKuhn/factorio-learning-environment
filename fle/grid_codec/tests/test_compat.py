@@ -69,3 +69,11 @@ def test_recipe_data_exposes_vocabulary(recipe_data):
     assert recipe_data.recipe_index["iron-gear-wheel"] > 0
     assert recipe_data.recipe_times["iron-gear-wheel"] > 0
     assert "iron-plate" in recipe_data.recipes["iron-gear-wheel"]["in_"]
+
+
+def test_recipe_data_is_frozen(recipe_data):
+    import pytest
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):
+        recipe_data.recipes = {}
+    assert recipe_data.vocabulary is recipe_data.vocabulary  # built once

@@ -277,9 +277,7 @@ class BlueprintEditor:
         if self.entities:
             min_x = min(e.x for e in self.entities)
             min_y = min(e.y for e in self.entities)
-            for e in self.entities:
-                e.x -= min_x
-                e.y -= min_y
+            self.entities = [e.model_copy(update={"x": e.x - min_x, "y": e.y - min_y}) for e in self.entities]
             print(f"  Positions normalized (shifted by {-min_x},{-min_y})")
 
     def cmd_entities(self, args: list[str]):

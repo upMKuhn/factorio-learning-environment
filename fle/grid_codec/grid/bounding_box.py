@@ -1,18 +1,23 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Sequence
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from fle.grid_codec.grid.entity_spec import EntitySpec
 
 
-@dataclass(frozen=True)
-class BoundingBox:
+class BoundingBox(BaseModel):
     """A world region in tiles: top-left corner and size."""
+    model_config = ConfigDict(frozen=True)
+
     x: int
     y: int
-    width: int
-    height: int
+    width: int = Field(ge=0)
+    height: int = Field(ge=0)
+
+    def __init__(self, x: int, y: int, width: int, height: int):
+        super().__init__(x=x, y=y, width=width, height=height)
 
     @classmethod
     def from_entities(cls, entities: Sequence[EntitySpec], padding: int = 1) -> BoundingBox:

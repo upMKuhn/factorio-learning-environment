@@ -16,7 +16,8 @@ class GridDecoder:
 
     Recipes are named only with a vocabulary and a recipe channel. Strict (the
     default) raises on anything an encoder could not have written: unknown ids,
-    multi-tile entities whose tiles do not form their exact footprint.
+    directions outside 0-15, multi-tile entities whose tiles do not form their
+    exact footprint. Lenient mode skips unknown ids and invalid directions.
     """
 
     def __init__(self, vocabulary: Vocabulary | None = None, strict: bool = True):
@@ -37,24 +38,25 @@ class GridDecoder:
 
         entities = []
         for y, x in sorted(anchors):
-            entity = self._entity(grid, int(y), int(x), tile_counts)
+            entity = self._entity(grid, int(y), int(x), tile_counts, (ox, oy))
             if entity is not None:
-                entity.x += ox
-                entity.y += oy
                 entities.append(entity)
         return entities
 
-    def _entity(self, grid: np.ndarray, y: int, x: int, tile_counts: dict[int, int]) -> EntitySpec | None:
+    def _entity(self, grid: np.ndarray, y: int, x: int, tile_counts: dict[int, int],
+                origin: tuple[int, int]) -> EntitySpec | None:
         type_id, direction, meta, instance = (int(v) for v in grid[y, x, :4])
-        if not ENTITY_REGISTRY.has_id(type_id):
+        problem = (f"unknown entity id {type_id}" if not ENTITY_REGISTRY.has_id(type_id)
+                   else f"invalid direction {direction}" if not 0 <= direction < 16 else None)
+        if problem:
             if self.strict:
-                raise EncodingError(f"unknown entity id {type_id} at ({x}, {y})")
+                raise EncodingError(f"{problem} at ({x}, {y})")
             return None
         info = ENTITY_REGISTRY.from_id(type_id)
         if self.strict:
             self._check_footprint(grid, y, x, info, direction, instance, tile_counts)
         return EntitySpec(
-            info.name, x, y, direction,
+            info.name, x + origin[0], y + origin[1], direction,
             recipe=self._recipe(grid, y, x),
             io_type=("output" if meta & Meta.UNDERGROUND_OUTPUT else "input") if info.is_underground_belt else None,
         )

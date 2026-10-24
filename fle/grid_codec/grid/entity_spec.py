@@ -1,27 +1,40 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from typing import Iterator, Literal, get_args
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from fle.grid_codec.registry import ENTITY_REGISTRY, EntityInfo, Footprint
 
-IO_TYPES = ("input", "output")
+IoType = Literal["input", "output"]
+IO_TYPES: tuple[str, ...] = get_args(IoType)
 
 
-@dataclass
-class EntitySpec:
+class EntitySpec(BaseModel):
     """One placed entity: type, top-left tile, direction and per-instance settings."""
-    name: str                          # prototype name, e.g. "stone-furnace"
-    x: int                             # top-left tile x (grid column)
-    y: int                             # top-left tile y (grid row)
-    direction: int = 0                 # 0-15
-    meta_override: int | None = None   # replaces the type's default Meta flags
-    recipe: str | None = None          # recipe set on a machine
-    io_type: str | None = None         # underground belts: "input" (entrance) or "output" (exit)
+    model_config = ConfigDict(frozen=True)
 
-    def __post_init__(self):
-        info = ENTITY_REGISTRY.get(self.name)
-        if self.io_type is None and info is not None and info.is_underground_belt:
-            self.io_type = "input"  # Factorio's default
+    name: str                                                # prototype name, e.g. "stone-furnace"; may be unknown
+    x: int                                                   # top-left tile x (grid column)
+    y: int                                                   # top-left tile y (grid row)
+    direction: int = Field(0, ge=0, lt=16)                   # 16-way: 0=N, 4=E, 8=S, 12=W
+    meta_override: int | None = Field(None, ge=0, lt=2 ** 16)  # replaces the type's default Meta flags
+    recipe: str | None = None                                # recipe set on a machine
+    io_type: IoType | None = Field(None, validate_default=True)  # underground belts: entrance or exit
+
+    def __init__(self, name: str, x: int, y: int, direction: int = 0, meta_override: int | None = None,
+                 recipe: str | None = None, io_type: IoType | None = None):
+        super().__init__(name=name, x=x, y=y, direction=direction, meta_override=meta_override,
+                         recipe=recipe, io_type=io_type)
+
+    @field_validator("io_type")
+    @classmethod
+    def _underground_belts_default_to_input(cls, io_type: str | None, info: ValidationInfo) -> str | None:
+        if io_type is None:
+            entity = ENTITY_REGISTRY.get(info.data.get("name"))
+            if entity is not None and entity.is_underground_belt:
+                return "input"  # Factorio's default
+        return io_type
 
     @property
     def info(self) -> EntityInfo:
@@ -31,7 +44,7 @@ class EntitySpec:
     def footprint(self) -> Footprint:
         return self.info.footprint(self.direction)
 
-    def tiles(self):
+    def tiles(self) -> Iterator[tuple[int, int]]:
         return self.footprint.tiles(self.x, self.y)
 
     def sort_key(self) -> tuple:

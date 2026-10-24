@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from pydantic import ValidationError
 
 from fle.grid_codec.grid import (
     BoundingBox, Channel, EncodingError, EntitySpec, GridDecoder, GridEncoder, Vocabulary,
@@ -87,7 +88,6 @@ def test_underground_output_sets_meta_bit():
     ([EntitySpec("stone-furnace", 0, 0), EntitySpec("inserter", 1, 1)], "overlap"),
     ([EntitySpec("stone-furnace", 0, 0, recipe="unobtainium")], "recipe"),
     ([EntitySpec("straight-rail", 0, 0)], "entity"),
-    ([EntitySpec("inserter", 0, 0, direction=16)], "direction"),
     ([EntitySpec("inserter", 0, 0, io_type="output")], "io_type"),
 ])
 def test_strict_encoder_refuses_bad_input(entities, message):
@@ -173,3 +173,60 @@ def test_strict_decoder_detects_unknown_entity_id():
 def test_bounding_box_respects_rotation():
     box = BoundingBox.from_entities([EntitySpec("steam-engine", 2, 3, direction=4)], padding=1)
     assert box == BoundingBox(1, 2, 7, 5)
+
+
+def test_strict_decoder_detects_invalid_direction():
+    grid, _ = roundtrip([EntitySpec("inserter", 0, 0)])
+    grid[0, 0, Channel.DIRECTION] = 16
+    with pytest.raises(EncodingError, match="direction"):
+        GridDecoder().decode(grid)
+    assert GridDecoder(strict=False).decode(grid) == []
+
+
+def test_decoder_offsets_entities_by_bounds():
+    grid, decoded = roundtrip([EntitySpec("stone-furnace", 5, -2)])
+    assert decoded == [EntitySpec("stone-furnace", 5, -2)]
+
+
+# ── Models ────────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("fields", [
+    dict(direction=16), dict(direction=-1), dict(io_type="sideways"), dict(meta_override=-1),
+    dict(x=1.5), dict(recipe=3),
+])
+def test_entity_spec_validates_fields(fields):
+    with pytest.raises(ValidationError):
+        EntitySpec(**{"name": "inserter", "x": 0, "y": 0, **fields})
+
+
+def test_entity_spec_positional_and_keyword_forms_agree():
+    assert EntitySpec("inserter", 1, 2, 4, recipe=None) == EntitySpec(name="inserter", x=1, y=2, direction=4)
+
+
+def test_entity_spec_is_frozen_and_hashable():
+    spec = EntitySpec("inserter", 1, 2, 4)
+    with pytest.raises(ValidationError):
+        spec.x = 3
+    assert len({spec, EntitySpec("inserter", 1, 2, 4)}) == 1
+    assert spec.model_copy(update={"x": 3}) == EntitySpec("inserter", 3, 2, 4)
+
+
+def test_underground_belts_default_to_entrances():
+    assert EntitySpec("underground-belt", 0, 0).io_type == "input"
+    assert EntitySpec.model_validate({"name": "underground-belt", "x": 0, "y": 0}).io_type == "input"
+    assert EntitySpec("inserter", 0, 0).io_type is None
+
+
+def test_entity_spec_dict_form_round_trips():
+    spec = EntitySpec("underground-belt", 4, 5, 8, io_type="output")
+    assert spec.to_dict() == {"name": "underground-belt", "x": 4, "y": 5, "direction": 8, "type": "output"}
+    assert EntitySpec.from_dict(spec.to_dict()) == spec
+
+
+def test_bounding_box_is_frozen_and_validated():
+    box = BoundingBox(-1, 2, 3, 4)
+    assert box == BoundingBox(x=-1, y=2, width=3, height=4) and box.shape == (4, 3)
+    with pytest.raises(ValidationError):
+        box.x = 0
+    with pytest.raises(ValidationError):
+        BoundingBox(0, 0, -1, 4)

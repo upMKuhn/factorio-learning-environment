@@ -4,8 +4,9 @@ import json
 
 import numpy as np
 import pytest
+from pydantic import ValidationError
 
-from fle.grid_codec.blueprints import Layout
+from fle.grid_codec.blueprints import Layout, SourceBlueprint
 from fle.grid_codec.dataset import (
     BuildManifest, CarriedItemsCheck, EncodedSample, GridFormatCheck, IntegrityChecker, OverlapCheck, RoundTripCheck,
 )
@@ -47,6 +48,19 @@ def test_layout_bounds():
     assert LAYOUT.bounds(padding=1) == BoundingBox(-1, -1, 7, 8)
 
 
+def test_layout_is_frozen_and_ignores_its_source_in_equality():
+    with pytest.raises(ValidationError):
+        LAYOUT.entities = ()
+    tagged = Layout(LAYOUT.entities, SourceBlueprint(label="x", entities=[]))
+    assert tagged == LAYOUT and hash(tagged) == hash(LAYOUT)
+    assert tagged.source.label == "x"
+
+
+def test_layout_holds_entity_specs_only():
+    with pytest.raises(ValidationError):
+        Layout(("transport-belt",))
+
+
 # ── IntegrityChecker ──────────────────────────────────────────────────────────
 
 @pytest.fixture
@@ -63,6 +77,14 @@ def test_encoded_sample_keeps_grid_and_bounds():
     assert sample.bounds == LAYOUT.bounds(padding=1)
     assert sample.grid.shape == (8, 7, 7)
     assert sample.entities_in_grid()[0] == EntitySpec("assembling-machine-1", 1, 1, recipe="copper-cable")
+
+
+def test_encoded_sample_is_frozen_and_holds_an_array():
+    sample = encoded()
+    with pytest.raises(ValidationError):
+        sample.bounds = BoundingBox(0, 0, 1, 1)
+    with pytest.raises(ValidationError):
+        EncodedSample(layout=LAYOUT, grid=[[0]], bounds=sample.bounds)
 
 
 def test_default_pipeline_runs_every_check():
@@ -121,7 +143,7 @@ def test_items_off_belts_are_reported(checker):
 
 def test_wrong_dtype_is_reported(checker):
     sample = encoded()
-    sample = EncodedSample(sample.layout, sample.grid.astype(np.int32), sample.bounds)
+    sample = sample.model_copy(update={"grid": sample.grid.astype(np.int32)})
     assert any("dtype" in f for f in checker.check(sample))
 
 

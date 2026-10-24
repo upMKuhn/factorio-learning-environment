@@ -1,6 +1,7 @@
 """Reading the source: BlueprintString, SourceBlueprint, JsonlBlueprintSource, VersionConventions."""
 
 import pytest
+from pydantic import ValidationError
 
 from fle.grid_codec.blueprints import (
     BlueprintString, JsonlBlueprintSource, Pre20Conventions, SourceBlueprint, SyntheticBlueprintSource,
@@ -67,6 +68,22 @@ def test_content_key_sees_recipes_and_underground_type():
 def test_synthetic_blueprints_without_version_are_2_0():
     bp = SourceBlueprint.from_dict({"label": "s", "entities": [{"name": "inserter", "x": 0, "y": 0}]})
     assert bp.major_version == 2 and bp.entity_count == 1
+
+
+def test_source_blueprint_is_frozen_and_validated():
+    bp = SourceBlueprint(label="a", entities=[BELT], tags=["x", "y"])
+    assert bp.tags == ("x", "y")
+    with pytest.raises(ValidationError):
+        bp.label = "b"
+    with pytest.raises(ValidationError):
+        SourceBlueprint(label="a", entities=[BELT], favorites=-1)
+    with pytest.raises(ValidationError):
+        SourceBlueprint(label="a", entities=["transport-belt"])
+
+
+def test_source_blueprint_dict_form_round_trips():
+    bp = SourceBlueprint(label="a", entities=[BELT], version=V2_0, book="b", tags=("t",), favorites=3)
+    assert SourceBlueprint.from_dict(bp.to_dict()) == bp
 
 
 # ── JsonlBlueprintSource ──────────────────────────────────────────────

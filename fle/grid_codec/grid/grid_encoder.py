@@ -7,7 +7,7 @@ import numpy as np
 from fle.grid_codec.grid.bounding_box import BoundingBox
 from fle.grid_codec.grid.channel import Channel
 from fle.grid_codec.grid.encoding_error import EncodingError
-from fle.grid_codec.grid.entity_spec import IO_TYPES, EntitySpec
+from fle.grid_codec.grid.entity_spec import EntitySpec
 from fle.grid_codec.grid.vocabulary import Vocabulary
 from fle.grid_codec.registry import ENTITY_REGISTRY, Meta
 
@@ -76,12 +76,8 @@ class GridEncoder:
                     grid[y, x, channel] = self._item_id(item)
 
     def _validate(self, entity: EntitySpec, info) -> None:
-        if not self.strict:
-            return
-        if not 0 <= entity.direction < 16:
-            raise EncodingError(f"invalid direction in {entity}")
-        if info.is_underground_belt != (entity.io_type is not None) or (
-                entity.io_type is not None and entity.io_type not in IO_TYPES):
+        # EntitySpec itself guarantees a 16-way direction and a known io_type value.
+        if self.strict and info.is_underground_belt != (entity.io_type is not None):
             raise EncodingError(f"invalid io_type in {entity}")
 
     @staticmethod
