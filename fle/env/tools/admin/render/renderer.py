@@ -5,7 +5,6 @@ Renders Factorio blueprints including resource patches
 """
 
 import copy
-import json
 import math
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
@@ -1186,28 +1185,3 @@ class Renderer:
         )
         mask = sprite if sprite.mode == "RGBA" else None
         img.paste(sprite, (start_x, start_y), mask)
-
-
-def main():
-    """Example usage"""
-    sprites_dir = Path("../.fle/sprites")
-    image_resolver = ImageResolver(str(sprites_dir))
-
-    with open(
-        "/Users/jackhopkins/PycharmProjects/PaperclipMaximiser/fle/agents/data/sprites/sample_blueprint.json",
-        "r",
-    ) as f:
-        blueprint_json = json.loads(f.read().strip())
-
-    blueprint = Renderer(blueprint_json, sprites_dir)
-    size = blueprint.get_size()
-    width = size["width"] * DEFAULT_SCALING
-    height = size["height"] * DEFAULT_SCALING
-
-    image = blueprint.render(width, height, image_resolver)
-    image.show()
-    print(f"Blueprint rendered ({width}x{height})")
-
-
-if __name__ == "__main__":
-    main()

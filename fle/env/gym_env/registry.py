@@ -2,11 +2,9 @@ import os
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional
 
-from fle.env.a2a_instance import A2AFactorioInstance
 import gym
 
 from fle.commons.cluster_ips import get_local_container_ips
-from fle.commons.asyncio_utils import run_async_safely
 from fle.env import FactorioInstance
 from fle.env.gym_env.environment import FactorioGymEnv
 from fle.eval.tasks import TaskFactory
@@ -134,10 +132,7 @@ def make_factorio_env(spec: GymEnvironmentSpec, run_idx: int) -> FactorioGymEnv:
         }
 
         print(f"Using local Factorio container at {address}:{tcp_port}")
-        if spec.num_agents > 1:
-            instance = run_async_safely(A2AFactorioInstance.create(**common_kwargs))
-        else:
-            instance = FactorioInstance(**common_kwargs)
+        instance = FactorioInstance(**common_kwargs)
 
         # Set initial speed and unpause
         instance.set_speed_and_unpause(10)

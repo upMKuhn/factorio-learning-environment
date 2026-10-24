@@ -8,7 +8,7 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="slpp")
 __version__ = "0.4.2"
 
 # Make submodules available
-from fle import agents, env, eval, cluster, commons
+from fle import env, eval, cluster, commons
 
 # Auto-register all gym environments when FLE is imported
 try:

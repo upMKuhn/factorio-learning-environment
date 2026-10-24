@@ -14,7 +14,8 @@ from fle.env.gym_env.action import Action
 from fle.commons.models.achievements import ProductionFlows
 from fle.commons.constants import REWARD_OVERRIDE_KEY
 from fle.env.utils.achievements import calculate_achievements
-from fle.agents import Response, TaskResponse
+from fle.commons.models.response import Response
+from fle.commons.models.task_response import TaskResponse
 from fle.env.gym_env.observation import (
     Observation,
     GameInfo,

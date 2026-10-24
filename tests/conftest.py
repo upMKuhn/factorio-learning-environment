@@ -114,16 +114,22 @@ def instance(pytestconfig, worker_id):
 
 
 # # Reset state between tests without recreating the instance
+GAME_FIXTURES = {"instance", "namespace", "game"}
+
+
 @pytest.fixture(autouse=True)
-def _reset_between_tests(instance, request):
+def _reset_between_tests(request):
     """
     Ensure clean state between tests without reloading Lua/scripts.
     """
+    fixturenames = set(getattr(request, "fixturenames", []))
     # If this test explicitly uses `configure_game`, let that fixture perform
     # the reset to avoid double resets and allow per-test options.
-    if "configure_game" in getattr(request, "fixturenames", []):
+    # Tests that use no game fixture (pure unit tests) need no server at all.
+    if "configure_game" in fixturenames or not (GAME_FIXTURES & fixturenames):
         yield
         return
+    instance = request.getfixturevalue("instance")
     # Restore the default inventory in case a previous test changed it
     # Note: ensure_connected() is called inside reset() so we don't need to call it here
     if hasattr(instance, "default_initial_inventory"):

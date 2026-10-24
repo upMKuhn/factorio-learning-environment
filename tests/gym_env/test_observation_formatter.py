@@ -3,7 +3,7 @@ from fle.env.gym_env.observation import Observation, GameInfo, AgentMessage
 from fle.commons.models.achievements import ProductionFlows
 from fle.commons.models.research_state import ResearchState
 from fle.commons.models.technology_state import TechnologyState
-from fle.agents.models import TaskResponse
+from fle.commons.models.task_response import TaskResponse
 
 
 def make_minimal_observation(**kwargs):

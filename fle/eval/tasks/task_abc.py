@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 from fle.env import Inventory
 from fle.env import FactorioInstance
-from fle.agents import TaskResponse
+from fle.commons.models.task_response import TaskResponse
 from fle.commons.models.game_state import GameState
 
 

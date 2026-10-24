@@ -5,7 +5,7 @@ import json
 from fle.commons.models.technology_state import TechnologyState
 from fle.commons.models.research_state import ResearchState
 from fle.commons.models.achievements import ProductionFlows
-from fle.agents import TaskResponse
+from fle.commons.models.task_response import TaskResponse
 from fle.env.entities import Inventory
 
 

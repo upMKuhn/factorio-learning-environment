@@ -8,20 +8,11 @@ validation, and code reusability.
 Task types:
 - UnboundedThroughputTaskConfig: Still tracks a specific entity but without strict quota
 - DefaultTaskConfig: Open-ended tasks (legacy, shorter trajectory)
-- UnboundedProductionTaskConfig: Open-play tasks that track cumulative production score
 """
 
-from pathlib import Path
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Literal, Dict, Any, Union
 from fle.env.game_types import Prototype
-
-
-def _load_prompt(filename: str) -> str:
-    """Load a prompt template from a .jinja2.md file in the same directory."""
-    prompt_path = Path(__file__).parent / filename
-    return prompt_path.read_text().strip()
 
 
 # Task name constants for easy importing
@@ -29,7 +20,6 @@ IRON_GEAR_WHEEL_THROUGHPUT_UNBOUNDED = (
     "iron_gear_wheel_throughput_unbounded_steps_show_steps_true"
 )
 OPEN_PLAY = "open_play"
-OPEN_PLAY_PRODUCTION = "open_play_production"
 
 
 class UnboundedThroughputTaskConfig(BaseModel):
@@ -83,37 +73,6 @@ class DefaultTaskConfig(BaseModel):
         return self.dict()
 
 
-class UnboundedProductionTaskConfig(BaseModel):
-    """Configuration for unbounded production tasks (build biggest factory).
-
-    These tasks:
-    - Track cumulative production score (total economic value of all production)
-    - Have no quota or target - the goal is to maximize production
-    - Are designed for long trajectories (5000 steps by default)
-    - Use the unbounded solver and unbounded scorer
-    """
-
-    task_type: Literal["unbounded_production"] = "unbounded_production"
-    num_agents: int = 1
-    trajectory_length: int = Field(
-        default=5000, description="Number of steps in trajectory"
-    )
-    holdout_wait_period: int = 60
-    pre_holdout_wait_period: int = 60
-
-    # Task description
-    goal_description: str
-    task_key: str
-
-    class Config:
-        frozen = True
-        extra = "forbid"
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for compatibility with existing code."""
-        return self.dict()
-
-
 # Define unbounded throughput tasks
 iron_gear_wheel_throughput_unbounded = UnboundedThroughputTaskConfig(
     goal_description="Create an automatic iron gear wheel factory.",
@@ -127,14 +86,6 @@ open_play = DefaultTaskConfig(
     task_key=OPEN_PLAY,
 )
 
-# Define unbounded production tasks (for Inspect evaluation)
-open_play_production = UnboundedProductionTaskConfig(
-    goal_description=_load_prompt("open_play_production.jinja2.md"),
-    task_key=OPEN_PLAY_PRODUCTION,
-    trajectory_length=5000,
-)
-
-
 # Create dictionaries for easy lookup by task key
 UNBOUNDED_THROUGHPUT_TASKS = {
     IRON_GEAR_WHEEL_THROUGHPUT_UNBOUNDED: iron_gear_wheel_throughput_unbounded,
@@ -144,23 +95,16 @@ DEFAULT_TASKS = {
     OPEN_PLAY: open_play,
 }
 
-UNBOUNDED_PRODUCTION_TASKS = {
-    OPEN_PLAY_PRODUCTION: open_play_production,
-}
-
 # Combined lookup for all unbounded tasks
 UNBOUNDED_TASKS = {
     **UNBOUNDED_THROUGHPUT_TASKS,
     **DEFAULT_TASKS,
-    **UNBOUNDED_PRODUCTION_TASKS,
 }
 
 
 def get_unbounded_task(
     task_key: str,
-) -> Union[
-    UnboundedThroughputTaskConfig, DefaultTaskConfig, UnboundedProductionTaskConfig
-]:
+) -> Union[UnboundedThroughputTaskConfig, DefaultTaskConfig]:
     """Get an unbounded task configuration by its key.
 
     Args:

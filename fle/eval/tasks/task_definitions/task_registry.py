@@ -8,7 +8,6 @@ Task types:
 - throughput: Quota-based throughput tasks (produce X items/minute)
 - unbounded_throughput: Throughput without strict quota
 - default: Open-ended tasks (legacy)
-- unbounded_production: Open-play tasks tracking cumulative production score
 """
 
 from typing import Dict, Any
@@ -22,10 +21,6 @@ from fle.eval.tasks.task_definitions.lab_play.throughput_tasks import (
 from fle.eval.tasks.task_definitions.unbounded.unbounded_tasks import (
     UNBOUNDED_TASKS,
     list_unbounded_tasks,
-)
-from fle.eval.tasks.task_definitions.multiagent.multiagent_tasks import (
-    MULTIAGENT_TASKS,
-    list_multiagent_tasks,
 )
 
 # Import task classes for type mapping
@@ -51,18 +46,11 @@ class TaskRegistry:
         # Add unbounded tasks
         self._all_tasks.update(UNBOUNDED_TASKS)
 
-        # Add multiagent tasks
-        self._all_tasks.update(MULTIAGENT_TASKS)
-
         # Map task types to their implementation classes
-        # Note: unbounded_production tasks are handled by Inspect solver/scorer directly,
-        # not through the TaskABC class hierarchy. They use factorio_unbounded_solver
-        # and unbounded_production_scorer from the inspect_integration module.
         self._task_type_to_class = {
             "throughput": ThroughputTask,
             "unbounded_throughput": UnboundedThroughputTask,
             "default": DefaultTask,
-            # "unbounded_production" is handled by Inspect framework, not TaskABC
         }
 
     def get_task_config(self, task_key: str) -> BaseModel:
@@ -127,7 +115,6 @@ class TaskRegistry:
         return {
             "throughput": list_throughput_tasks(),
             "unbounded": list_unbounded_tasks(),
-            "multiagent": list_multiagent_tasks(),
         }
 
     def get_task_info(self, task_key: str) -> Dict[str, Any]:

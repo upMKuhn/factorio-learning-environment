@@ -1,73 +1,49 @@
-<h1 align="center">Factorio Learning Environment</h1>
-<p align="center">
-  <a href="https://jackhopkins.github.io/factorio-learning-environment/leaderboard">Leaderboard</a> | <a href="https://arxiv.org/abs/2503.09617">Paper</a> | <a href="https://jackhopkins.github.io/factorio-learning-environment/versions/0.3.0.html">Website</a> | <a href="https://jackhopkins.github.io/factorio-learning-environment/sphinx/build/html/">Documentation</a> | <a href="https://discord.gg/zKaV2skewa">Discord (#factorio-learning-env)</a>
-</p>
+# Factorio Learning Environment (slim fork)
 
-<p align="center">
-An open source framework for developing and evaluating LLM agents in the game of <a href="https://factorio.com/">Factorio</a>.
-</p>
+A fork of the [Factorio Learning Environment](https://github.com/JackHopkins/factorio-learning-environment)
+([paper](https://arxiv.org/abs/2503.09617)) cut down to one job: **interfacing with Factorio and its benchmarks**.
+The upstream LLM-agent harness (agents, Inspect/MCP/A2A integrations, eval runners, plots, docs site) has been removed.
 
-<p align="center">
-<img src="https://github.com/JackHopkins/factorio-learning-environment/raw/main/docs/assets/videos/compressed_sulfuric_acid.webp" width="485" height="364" controls/>
-<img src="https://github.com/JackHopkins/factorio-learning-environment/raw/main/docs/assets/videos/compressed_red_science.webp" width="485" height="364" controls/>
-</p>
-<p align="center"><em>Claude Opus 4.1 Plays Factorio</em></p>
+## What is here
 
-## Quick Links
+| Path | Purpose |
+|------|---------|
+| `fle/env` | `FactorioInstance` (RCON connection, Lua tool loading, Python namespace), entities and game types, agent/admin tools, Lua mods |
+| `fle/env/gym_env` | Gym interface (`FactorioGymEnv`) and a registry that exposes every benchmark task via `gym.make()` |
+| `fle/eval/tasks` | Benchmark task definitions: throughput (lab play) and unbounded tasks, plus their registry |
+| `fle/cluster` | Docker headless servers, scenarios, server config |
+| `fle/commons` | Shared pydantic/data models (game state, research state, production flows, step and task results) |
 
-- [Installation](#installation)
-- [Environment](#environment)
-- [Contributing](#contributing)
+## Usage
 
-## Installation
-
-### Prerequisites
-
-- Docker
-- Python 3.10+
-- [Factorio](https://www.factorio.com/) (version 2.0.76 or later), only for optional rendering.
+Requires Docker and Python 3.10+.
 
 ```bash
-# Core FLE SDK package
-pip install factorio-learning-environment
-
-# With optional features
-pip install factorio-learning-environment[eval]      # For running experiments
-pip install factorio-learning-environment[mcp]       # For MCP protocol support  
-pip install factorio-learning-environment[psql]      # For PostgreSQL support
-pip install factorio-learning-environment[eval,mcp,psql]  # All features
-
-# Using uv (recommended)
 uv sync
+fle cluster start -n 1        # start headless Factorio server(s)
+fle sprites                   # optional: sprites for the render tool / gym vision
 ```
 
-### Quickstart
+```python
+from fle.env import FactorioInstance
 
-Use the CLI:
+instance = FactorioInstance(address="localhost", tcp_port=27000, fast=True)
+namespace = instance.namespace
+```
+
+```python
+import gym
+import fle.env.gym_env.registry  # registers all benchmark tasks
+
+env = gym.make("iron_plate_throughput", run_idx=0)
+```
+
+## Tests
+
+Most tests drive a live server (`fle cluster start`). Unit tests that need no server run with:
 
 ```bash
-# Activate venv
-source .venv/bin/activate
-
-# Start Factorio cluster
-fle cluster start
-
-# Run evaluation trajectories (requires [eval] dependencies)
-fle eval --config configs/gym_run_config.json
+pytest tests/test_package_imports.py tests/test_cli.py tests/commons tests/tasks \
+       tests/gym_env/test_registry_offline.py tests/gym_env/test_observation_formatter.py \
+       tests/render/test_sprite_pipeline.py tests/test_rcon_utils.py
 ```
-
-## Environment
-
-FLE is an agent evaluation environment built on the game of Factorio, a popular resource management simulation game.
-
-Agents interact with **FLE** by code synthesis through a **REPL** (Read-Eval-Print-Loop) pattern:
-
-1. **Observation**: The agent observes the world through the output streams (stderr/stdout) of their last program.
-2. **Action**: The agent generates a Python program to perform their desired action.
-3. **Feedback**: The environment executes the program, assigns variables, add classes/functions to the namespace, and provides an output stream.
-
-## Contributing
-
-Join our team and contribute to one of the AI research community's most challenging problems - building open-ended / unsaturateable evals for post-AGI frontier models. If you want to contribute, please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JackHopkins/factorio-learning-environment)
