@@ -23,7 +23,7 @@ class TestEmptyGrid:
 
     def test_empty_grid_is_all_zeros(self):
         grid = encode([], bounds=BoundingBox(0, 0, 8, 8))
-        assert grid.shape == (8, 8, 4)
+        assert grid.shape == (8, 8, 7)
         assert np.all(grid == 0)
 
 
